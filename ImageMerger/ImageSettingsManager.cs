@@ -6,7 +6,9 @@ namespace ImageMerger
 {
     public class ImageSettingsManager
     {
-        public static ImageSettings ReadSettings(string settingFilePath)
+        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(ImageSettings));
+
+        public ImageSettings ReadSettings(string settingFilePath)
         {
             string fileContent = null;
             using (StreamReader sr = File.OpenText(settingFilePath))
@@ -14,7 +16,6 @@ namespace ImageMerger
                 fileContent = sr.ReadToEnd();
             }
 
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(ImageSettings));
             MemoryStream streamedContent = new MemoryStream(Encoding.UTF8.GetBytes(fileContent));
             return (ImageSettings)serializer.ReadObject(streamedContent);
         }
