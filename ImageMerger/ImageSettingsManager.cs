@@ -16,7 +16,7 @@ namespace ImageMerger
                 fileContent = sr.ReadToEnd();
             }
 
-            MemoryStream streamedContent = new MemoryStream(Encoding.UTF8.GetBytes(fileContent));
+            var streamedContent = new MemoryStream(Encoding.UTF8.GetBytes(fileContent));
             return (ImageSettings)serializer.ReadObject(streamedContent);
         }
     }

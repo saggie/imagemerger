@@ -5,8 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ImageMerger"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
-    </Grid>
+        Title="ImageMerger"
+        MinWidth="320" MinHeight="240" SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+        KeyDown="Window_KeyDown" KeyUp="Window_KeyUp"
+        Background="Black"
+        >
+    <StackPanel Name="stackPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Image Name="image" Stretch="None" Width="auto" Height="auto" MouseDown="image_MouseDown"/>
+    </StackPanel>
 </Window>

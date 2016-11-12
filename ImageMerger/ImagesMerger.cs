@@ -8,6 +8,7 @@ namespace ImageMerger
     public class ImagesMerger
     {
         public Bitmap margedImage;
+        private ImageFormat outputImageFormat;
 
         private string settingFilePath;
         private string workingDirectoryPath;
@@ -34,10 +35,14 @@ namespace ImageMerger
 
             var maxWidth = sourceImages.Select(i => i.width).Max();
             var maxHeight = sourceImages.Select(i => i.height).Max();
-            var imageFormat = sourceImages.First().imageFormat; // FIXME
+            outputImageFormat = sourceImages.First().imageFormat; // FIXME
 
             CreateMergedImage(sourceImages, maxWidth, maxHeight);
-            SaveMergedImage(settings.outputFileName, imageFormat);
+        }
+
+        internal string GetFileName()
+        {
+            return settings.outputFileName;
         }
 
         private SourceImage LoadSourceImage(SourceImageInfo sourceImageInfo)
@@ -66,6 +71,11 @@ namespace ImageMerger
             ret.margin = sourceImageInfo.margin;
 
             return ret;
+        }
+
+        internal void Save()
+        {
+            SaveMergedImage(settings.outputFileName, outputImageFormat);
         }
 
         private ImageFormat GetImageFormatFromFileExtension(string fileName)
