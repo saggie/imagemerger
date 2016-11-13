@@ -60,6 +60,7 @@
     <Compile Include="ImagesMerger.cs" />
     <Compile Include="ImageSettings.cs" />
     <Compile Include="ImageSettingsManager.cs" />
+    <Compile Include="PixelUtil.cs" />
     <Compile Include="SourceImage.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

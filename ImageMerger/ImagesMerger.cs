@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
@@ -56,28 +57,12 @@ namespace ImageMerger
                 ret.width = sourceBitmap.Width;
                 ret.height = sourceBitmap.Height;
                 ret.imageFormat = GetImageFormatFromFileExtension(filePath);
-                ret.pixels = ConvertBitmapToByteArray(sourceBitmap);
+                ret.pixels = sourceBitmap.ToByteArray();
             }
 
             ret.alpha = sourceImageInfo.alpha;
             ret.isShadow = sourceImageInfo.isShadow;
             ret.margin = sourceImageInfo.margin;
-
-            return ret;
-        }
-
-        private byte[] ConvertBitmapToByteArray(Bitmap bitmap)
-        {
-            var ret = new byte[bitmap.Width * bitmap.Height * 4];
-
-            BitmapData data = bitmap.LockBits(
-                        new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                        ImageLockMode.ReadWrite,
-                        PixelFormat.Format32bppArgb);
-
-            Marshal.Copy(data.Scan0, ret, 0, ret.Length);
-
-            bitmap.UnlockBits(data);
 
             return ret;
         }
@@ -109,57 +94,28 @@ namespace ImageMerger
                 {
                     for (var xi = 0; xi < eachImage.width; xi++)
                     {
-                        var pixel = GetPixel(eachImage.pixels, xi, yi, eachImage.width);
+                        var pixel = PixelUtil.GetPixel(eachImage.pixels, xi, yi, eachImage.width);
 
-                        if (!isFirstLayer && IsWhitePixel(pixel)) { continue; }
+                        // skip if nothing to draw (from 2nd layer)
+                        if (!isFirstLayer && pixel.IsWhite()) { continue; }
 
-                        mergedPixels[GetAddressR(xi, yi, width)] = pixel[0];
-                        mergedPixels[GetAddressG(xi, yi, width)] = pixel[1];
-                        mergedPixels[GetAddressB(xi, yi, width)] = pixel[2];
-                        mergedPixels[GetAddressA(xi, yi, width)] = pixel[3];
+                        // process shadowing
+                        if (eachImage.isShadow && !pixel.IsWhite())
+                        {
+                            var sourcePixel = PixelUtil.GetPixel(mergedPixels, xi, yi, width);
+                            pixel = PixelUtil.GetShadowedPixel(sourcePixel);
+                        }
+
+                        mergedPixels[PixelUtil.GetAddressR(xi, yi, width)] = pixel[0];
+                        mergedPixels[PixelUtil.GetAddressG(xi, yi, width)] = pixel[1];
+                        mergedPixels[PixelUtil.GetAddressB(xi, yi, width)] = pixel[2];
+                        mergedPixels[PixelUtil.GetAddressA(xi, yi, width)] = pixel[3];
                     }
                 }
                 isFirstLayer = false;
             }
 
-            margedImage = ConvertByteArrayToBitmap(mergedPixels, width, height);
-        }
-
-        private byte[] GetPixel(byte[] sourcePixels, int addrX, int addrY, int width)
-        {
-            return new byte[]
-            {
-                sourcePixels[GetAddressR(addrX, addrY, width)],
-                sourcePixels[GetAddressG(addrX, addrY, width)],
-                sourcePixels[GetAddressB(addrX, addrY, width)],
-                0xFF
-            };
-        }
-
-        private int GetAddressR(int addrX, int addrY, int width) { return (addrX + addrY * width) * 4 + 0; }
-        private int GetAddressG(int addrX, int addrY, int width) { return (addrX + addrY * width) * 4 + 1; }
-        private int GetAddressB(int addrX, int addrY, int width) { return (addrX + addrY * width) * 4 + 2; }
-        private int GetAddressA(int addrX, int addrY, int width) { return (addrX + addrY * width) * 4 + 3; }
-
-        private Bitmap ConvertByteArrayToBitmap(byte[] byteArray, int width, int height)
-        {
-            Bitmap ret = new Bitmap(width, height);
-
-            BitmapData data = ret.LockBits(
-                        new Rectangle(0, 0, ret.Width, ret.Height),
-                        ImageLockMode.ReadWrite,
-                        PixelFormat.Format32bppArgb);
-
-            Marshal.Copy(byteArray, 0, data.Scan0, byteArray.Length);
-
-            ret.UnlockBits(data);
-
-            return ret;
-        }
-
-        private bool IsWhitePixel(byte[] pixel)
-        {
-            return (pixel[0] == 0xff) && (pixel[1] == 0xff) && (pixel[2] == 0xff);
+            margedImage = mergedPixels.ToBitmap(width, height);
         }
 
         private void SaveMergedImage(string fileName, ImageFormat imageFormat)
