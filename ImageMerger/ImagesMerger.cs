@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace ImageMerger
 {
@@ -90,11 +88,20 @@ namespace ImageMerger
             bool isFirstLayer = true;
             foreach (var eachImage in sourceImages.Reverse())
             {
+                var sourcePixels = eachImage.pixels;
+                if (eachImage.margin > 0)
+                {
+                    sourcePixels = PixelUtil.CreateMaskedPixels(
+                            sourcePixels, eachImage.width, eachImage.height, eachImage.margin,
+                            PixelUtil.GetCyan());
+                }
+
+                // merge images
                 for (var yi = 0; yi < eachImage.height; yi++)
                 {
                     for (var xi = 0; xi < eachImage.width; xi++)
                     {
-                        var pixel = PixelUtil.GetPixel(eachImage.pixels, xi, yi, eachImage.width);
+                        var pixel = PixelUtil.GetPixel(sourcePixels, xi, yi, eachImage.width);
 
                         // skip if nothing to draw (from 2nd layer)
                         if (!isFirstLayer && pixel.IsWhite()) { continue; }
@@ -106,9 +113,9 @@ namespace ImageMerger
                             pixel = PixelUtil.GetShadowedPixel(sourcePixel);
                         }
 
-                        mergedPixels[PixelUtil.GetAddressR(xi, yi, width)] = pixel[0];
+                        mergedPixels[PixelUtil.GetAddressB(xi, yi, width)] = pixel[0];
                         mergedPixels[PixelUtil.GetAddressG(xi, yi, width)] = pixel[1];
-                        mergedPixels[PixelUtil.GetAddressB(xi, yi, width)] = pixel[2];
+                        mergedPixels[PixelUtil.GetAddressR(xi, yi, width)] = pixel[2];
                         mergedPixels[PixelUtil.GetAddressA(xi, yi, width)] = pixel[3];
                     }
                 }
