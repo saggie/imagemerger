@@ -11,6 +11,7 @@
         KeyDown="Window_KeyDown" KeyUp="Window_KeyUp"
         >
     <StackPanel Name="stackPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Width="320" Height="240">
+        <Image Name="image" Stretch="None" Width="auto" Height="auto" MouseDown="image_MouseDown" Visibility="Hidden"/>
         <TextBlock x:Name="textBlock1" TextWrapping="Wrap" Text="[⬇]" HorizontalAlignment="Center" FontSize="120" Margin="0" FontWeight="Bold">
             <TextBlock.Foreground>
                 <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.GrayTextColorKey}}"/>
@@ -22,6 +23,5 @@
                 <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.GrayTextColorKey}}"/>
             </TextBlock.Foreground>
         </TextBlock>
-        <Image Name="image" Stretch="None" Width="auto" Height="auto" MouseDown="image_MouseDown" Visibility="Hidden"/>
     </StackPanel>
 </Window>

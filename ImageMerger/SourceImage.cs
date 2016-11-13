@@ -5,7 +5,7 @@ namespace ImageMerger
 {
     public class SourceImage
     {
-        public Color[] pixels;
+        public byte[] pixels;
         public int width;
         public int height;
         public ImageFormat imageFormat;
