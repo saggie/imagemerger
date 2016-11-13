@@ -6,11 +6,22 @@
         xmlns:local="clr-namespace:ImageMerger"
         mc:Ignorable="d"
         Title="ImageMerger"
-        MinWidth="320" MinHeight="240" SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+        AllowDrop="True" Drop="OnFileDrop"
         KeyDown="Window_KeyDown" KeyUp="Window_KeyUp"
-        Background="Black"
         >
-    <StackPanel Name="stackPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Image Name="image" Stretch="None" Width="auto" Height="auto" MouseDown="image_MouseDown"/>
+    <StackPanel Name="stackPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Width="320" Height="240">
+        <TextBlock x:Name="textBlock1" TextWrapping="Wrap" Text="[⬇]" HorizontalAlignment="Center" FontSize="120" Margin="0" FontWeight="Bold">
+            <TextBlock.Foreground>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.GrayTextColorKey}}"/>
+            </TextBlock.Foreground>
+        </TextBlock>
+        <TextBlock x:Name="textBlock2" TextWrapping="Wrap" 
+                   FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Text="Please drop a settings file here." Margin="0">
+            <TextBlock.Foreground>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.GrayTextColorKey}}"/>
+            </TextBlock.Foreground>
+        </TextBlock>
+        <Image Name="image" Stretch="None" Width="auto" Height="auto" MouseDown="image_MouseDown" Visibility="Hidden"/>
     </StackPanel>
 </Window>

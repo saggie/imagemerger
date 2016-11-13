@@ -2,34 +2,41 @@
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace ImageMerger
 {
     public partial class MainWindow : Window
     {
-        private enum ApplicationState { Waiting, Running }
-        private ApplicationState currentState = ApplicationState.Waiting;
         private static ImagesMerger imagesMerger = new ImagesMerger();
 
         public MainWindow()
         {
             InitializeComponent();
-
-            onFileDrop(); // temp
         }
 
-        public void onFileDrop()
+        private void OnFileDrop(object sender, DragEventArgs e)
         {
-            var settingsFilePath = @"C:\path\to\settings.json";
-            imagesMerger.Init(settingsFilePath);
+            var dropFiles = e.Data.GetData(DataFormats.FileDrop) as string[];
+            if (dropFiles == null) { return; }
+            imagesMerger.Init(dropFiles[0]);
+
+            EnterRunningState();
 
             ShowFileNameAtWindowTitle(imagesMerger.GetFileName());
             ResizeWindow(imagesMerger.margedImage.Width, imagesMerger.margedImage.Height);
 
             UpdateImage();
+        }
 
-            currentState = ApplicationState.Running;
+        public void EnterRunningState()
+        {
+            Background = new SolidColorBrush(Colors.Black);
+
+            textBlock1.Visibility = Visibility.Hidden;
+            textBlock2.Visibility = Visibility.Hidden;
+            image.Visibility = Visibility.Visible;
         }
 
         private void ShowFileNameAtWindowTitle(string fileName)
