@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -27,7 +29,7 @@ namespace ImageMerger
             ShowFileNameAtWindowTitle(imagesMerger.GetFileName());
             ResizeWindow(imagesMerger.margedImage.Width, imagesMerger.margedImage.Height);
 
-            UpdateImage();
+            RunUpdateChecker();
         }
 
         public void EnterRunningState()
@@ -50,12 +52,20 @@ namespace ImageMerger
             stackPanel.Height = height;
         }
 
-        private void image_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        public void RunUpdateChecker()
         {
-            if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
+            Task infiniteTask = Task.Factory.StartNew(() =>
             {
-                UpdateImage();
-            }
+                while (true)
+                {
+                    if (imagesMerger.IsImageFileUpdated())
+                    {
+                        image.Dispatcher.BeginInvoke(new Action(() => UpdateImage()));
+                        imagesMerger.UpdateImageFilePathToLastWriteTimeMap();
+                    }
+                    Thread.Sleep(500);
+                }
+            });
         }
 
         private void UpdateImage()

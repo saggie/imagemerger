@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 
 namespace ImageMerger
@@ -15,6 +16,8 @@ namespace ImageMerger
 
         private ImageSettingsManager imageSettingsManager = new ImageSettingsManager();
         private ImageSettings settings;
+
+        public IDictionary<string, long> imageFilePathToLastWriteTimeMap = new Dictionary<string, long>();
 
         public void Init(string settingFilePath)
         {
@@ -49,7 +52,7 @@ namespace ImageMerger
         {
             SourceImage ret = new SourceImage();
 
-            var filePath = System.IO.Path.Combine(workingDirectoryPath, sourceImageInfo.fileName);
+            var filePath = Path.Combine(workingDirectoryPath, sourceImageInfo.fileName);
             using (Bitmap sourceBitmap = new Bitmap(Image.FromFile(filePath)))
             {
                 ret.width = sourceBitmap.Width;
@@ -72,7 +75,7 @@ namespace ImageMerger
 
         private ImageFormat GetImageFormatFromFileExtension(string fileName)
         {
-            switch (System.IO.Path.GetExtension(fileName).ToLower()) {
+            switch (Path.GetExtension(fileName).ToLower()) {
                 case ".bmp": return ImageFormat.Bmp;
                 case ".gif": return ImageFormat.Gif;
                 case ".jpg":
@@ -127,12 +130,41 @@ namespace ImageMerger
 
         private void SaveMergedImage(string fileName, ImageFormat imageFormat)
         {
-            var filePath = System.IO.Path.Combine(workingDirectoryPath, fileName);
-            if (System.IO.File.Exists(filePath))
+            var filePath = Path.Combine(workingDirectoryPath, fileName);
+            if (File.Exists(filePath))
             {
-                System.IO.File.Delete(filePath);
+                File.Delete(filePath);
             }
             margedImage.Save(filePath, imageFormat);
+        }
+
+        public void UpdateImageFilePathToLastWriteTimeMap()
+        {
+            imageFilePathToLastWriteTimeMap = CreateImageFilePathToLastWriteTimeMap();
+        }
+
+        public bool IsImageFileUpdated()
+        {
+            var latestMap = CreateImageFilePathToLastWriteTimeMap();
+            foreach (var eachImage in latestMap.Keys)
+            {
+                if (!imageFilePathToLastWriteTimeMap.ContainsKey(eachImage) ||
+                    imageFilePathToLastWriteTimeMap[eachImage] != latestMap[eachImage])
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private IDictionary<string, long> CreateImageFilePathToLastWriteTimeMap() {
+            var ret = new Dictionary<string, long>();
+            foreach (var eachSourceImage in settings.sourceImages)
+            {
+                var filePath = Path.Combine(workingDirectoryPath, eachSourceImage.fileName);
+                ret[filePath] = File.GetLastWriteTime(filePath).Ticks;
+            }
+            return ret;
         }
     }
 }
