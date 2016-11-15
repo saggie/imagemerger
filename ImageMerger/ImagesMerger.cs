@@ -38,7 +38,7 @@ namespace ImageMerger
 
             var maxWidth = sourceImages.Select(i => i.width).Max();
             var maxHeight = sourceImages.Select(i => i.height).Max();
-            outputImageFormat = sourceImages.First().imageFormat; // FIXME
+            outputImageFormat = GetImageFormatFromFileExtension(settings.outputFileName);
 
             CreateMergedImage(sourceImages, maxWidth, maxHeight);
         }
@@ -61,9 +61,9 @@ namespace ImageMerger
                 ret.pixels = sourceBitmap.ToByteArray();
             }
 
-            ret.alpha = sourceImageInfo.alpha;
+            ret.alphaValue = sourceImageInfo.alphaValue;
             ret.isShadow = sourceImageInfo.isShadow;
-            ret.margin = sourceImageInfo.margin;
+            ret.maskInfoList = sourceImageInfo.maskInfo;
 
             return ret;
         }
@@ -92,10 +92,10 @@ namespace ImageMerger
             foreach (var eachImage in sourceImages.Reverse())
             {
                 var sourcePixels = eachImage.pixels;
-                if (eachImage.margin > 0)
+                if (eachImage.maskInfoList != null)
                 {
                     sourcePixels = PixelUtil.CreateMaskedPixels(
-                            sourcePixels, eachImage.width, eachImage.height, eachImage.margin,
+                            sourcePixels, eachImage.width, eachImage.height, eachImage.maskInfoList,
                             PixelUtil.GetCyan());
                 }
 

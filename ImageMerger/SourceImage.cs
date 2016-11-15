@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
 using System.Drawing.Imaging;
 
 namespace ImageMerger
@@ -9,8 +9,8 @@ namespace ImageMerger
         public int width;
         public int height;
         public ImageFormat imageFormat;
-        public int margin;
-        public float alpha;
+        public IList<MaskInfo> maskInfoList;
+        public float alphaValue;
         public bool isShadow;
     }
 }

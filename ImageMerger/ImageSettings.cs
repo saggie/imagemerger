@@ -14,8 +14,15 @@ namespace ImageMerger
     public class SourceImageInfo
     {
         [DataMember] public string fileName { get; set; }
-        [DataMember] public int margin { get; set; }
-        [DataMember] public float alpha { get; set; }
+        [DataMember] public float alphaValue { get; set; }
         [DataMember] public bool isShadow { get; set; }
+        [DataMember] public IList<MaskInfo> maskInfo { get; set; }
+    }
+
+    [DataContract]
+    public class MaskInfo
+    {
+       [DataMember] public string targetColor { get; set; }
+       [DataMember] public int margin { get; set; }
     }
 }

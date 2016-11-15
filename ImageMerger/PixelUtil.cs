@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace ImageMerger
@@ -91,7 +93,7 @@ namespace ImageMerger
             return GetBlack();
         }
 
-        public static byte[] CreateMaskedPixels(byte[] sourcePixels, int width, int height, int margin, byte[] maskValue)
+        public static byte[] CreateMaskedPixels(byte[] sourcePixels, int width, int height, IList<MaskInfo> maskInfoList, byte[] maskValue)
         {
             var ret = Copy(sourcePixels);
 
@@ -100,7 +102,10 @@ namespace ImageMerger
                 for (var xi = 0; xi < width; xi++)
                 {
                     byte[] targetPixel = GetPixel(sourcePixels, xi, yi, width);
-                    if (targetPixel.IsWhite()) { continue; }
+                    if (targetPixel.IsWhite() ||
+                        targetPixel.IsNotMaskTargetColor(maskInfoList.Select(m => m.targetColor))) { continue; }
+
+                    var margin = GetMargin(targetPixel, maskInfoList);
 
                     // move window from upper-left to lower-right...
                     //   <-----margin(2)---->
@@ -139,6 +144,54 @@ namespace ImageMerger
             var ret = new byte[source.Length];
             Buffer.BlockCopy(source, 0, ret, 0, source.Length * sizeof(byte));
             return ret;
+        }
+
+        private static bool IsNotMaskTargetColor(this byte[] pixel, IEnumerable<string> maskTargetColors)
+        {
+            return !pixel.IsMaskTargetColor(maskTargetColors);
+        }
+
+        private static bool IsMaskTargetColor(this byte[] pixel, IEnumerable<string> maskTargetColors)
+        {
+            foreach (var eachMaskTargetColor in maskTargetColors)
+            {
+                if (pixel.IsSameRgb(eachMaskTargetColor.ToPixelData()))
+                {
+                    return true; // hit (at least 1)
+                }
+            }
+            return false; // not hit at all
+        }
+
+        private static int GetMargin(byte[] pixel, IList<MaskInfo> maskInfoList)
+        {
+            foreach (var eachMaskInfo in maskInfoList)
+            {
+                if (pixel.IsSameRgb(eachMaskInfo.targetColor.ToPixelData()))
+                {
+                    return eachMaskInfo.margin;
+                }
+            }
+            return 0;
+        }
+
+        private static byte[] ToPixelData(this string colorString)
+        {
+            var strR = colorString.Substring(colorString.Length - 6, 2);
+            var strG = colorString.Substring(colorString.Length - 4, 2);
+            var strB = colorString.Substring(colorString.Length - 2, 2);
+            return new byte[]
+            {
+                (byte) int.Parse(strB, System.Globalization.NumberStyles.HexNumber),
+                (byte) int.Parse(strG, System.Globalization.NumberStyles.HexNumber),
+                (byte) int.Parse(strR, System.Globalization.NumberStyles.HexNumber),
+                0xFF
+            };
+        }
+
+        private static bool IsSameRgb(this byte[] pixel1, byte[] pixel2)
+        {
+            return pixel1[0] == pixel2[0] && pixel1[1] == pixel2[1] && pixel1[2] == pixel2[2];
         }
 
         public static bool IsWhite(this byte[] pixel) { return pixel[0] ==  0xFF && pixel[1] ==  0xFF && pixel[2] ==  0xFF; }
