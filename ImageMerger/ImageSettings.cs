@@ -25,6 +25,7 @@ namespace ImageMerger
     {
         [DataMember] public float value { get; set; }
         [DataMember] public string[] ignoreList { get; set; }
+        [DataMember] public bool excludeMask { get; set; }
     }
 
     [DataContract]

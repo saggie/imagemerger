@@ -19,6 +19,7 @@ namespace ImageMerger
     {
         public float value;
         public IList<byte[]> ignoreList;
+        public bool excludeMask;
 
         public AlphaInfo(AlphaSettings alphaSettings)
         {
@@ -28,6 +29,7 @@ namespace ImageMerger
             {
                 ignoreList.Add(ignoringColor.ToPixelData());
             }
+            excludeMask = alphaSettings.excludeMask;
         }
     }
 

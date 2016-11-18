@@ -106,7 +106,7 @@ namespace ImageMerger
         private void CreateMergedImage(IList<SourceImageInfo> sourceImages, int width, int height)
         {
             var mergedPixels = new byte[width * height * 4];
-            bool isNotTheFirstLayer = false;
+            int layerNum = 0;
             foreach (var eachImage in sourceImages.Reverse())
             {
                 var sourcePixels = eachImage.pixels;
@@ -116,21 +116,18 @@ namespace ImageMerger
                 {
                     for (var xi = 0; xi < eachImage.width; xi++)
                     {
-                        // process region-mask
-                        if (eachImage.maskedPixelsInfo != null &&
-                            eachImage.maskedPixelsInfo[xi + yi * eachImage.width])
-                        {
-                            mergedPixels[PixelUtil.GetAddressB(xi, yi, width)] = 0xFF;
-                            mergedPixels[PixelUtil.GetAddressG(xi, yi, width)] = 0xFF;
-                            mergedPixels[PixelUtil.GetAddressR(xi, yi, width)] = 0xFF;
-                            mergedPixels[PixelUtil.GetAddressA(xi, yi, width)] = 0xFF;
-                            continue;
-                        }
-
                         var drawingPixel = sourcePixels.GetPixelAt(xi, yi, eachImage.width);
 
+                        // process region-mask
+                        bool isMaskedPixel = false;
+                        if (IsMaskedPixel(eachImage.maskedPixelsInfo, xi, yi, eachImage.width))
+                        {
+                            drawingPixel = PixelUtil.GetWhite();
+                            isMaskedPixel = true;
+                        }
+
                         // skip if nothing to draw
-                        if (drawingPixel.IsWhite() && isNotTheFirstLayer) { continue; }
+                        if (IsNothingToDraw(drawingPixel, layerNum, isMaskedPixel)) { continue; }
 
                         // process shadowing
                         if (eachImage.isShadowLayer && !drawingPixel.IsWhite())
@@ -151,10 +148,14 @@ namespace ImageMerger
                         // process alpha-blending
                         if (eachImage.alphaInfo != null)
                         {
-                            var sourcePixel = mergedPixels.GetPixelAt(xi, yi, width);
-                            if (!eachImage.alphaInfo.ignoreList.Contains(sourcePixel))
+                            var alphaInfo = eachImage.alphaInfo;
+                            if (IsAlphaBlendingApplicable(isMaskedPixel, alphaInfo.excludeMask))
                             {
-                                drawingPixel = drawingPixel.BlendWith(sourcePixel, eachImage.alphaInfo.value);
+                                var sourcePixel = mergedPixels.GetPixelAt(xi, yi, width);
+                                if (!eachImage.alphaInfo.ignoreList.Contains(sourcePixel))
+                                {
+                                    drawingPixel = drawingPixel.BlendWith(sourcePixel, eachImage.alphaInfo.value);
+                                }
                             }
                         }
 
@@ -164,10 +165,34 @@ namespace ImageMerger
                         mergedPixels[PixelUtil.GetAddressA(xi, yi, width)] = drawingPixel[3];
                     }
                 }
-                isNotTheFirstLayer = true;
+                layerNum++;
             }
 
             mergedImage = mergedPixels.ToBitmap(width, height);
+        }
+
+        private bool IsMaskedPixel(bool[] maskedPixelInfo, int xi, int yi, int width)
+        {
+            if (maskedPixelInfo != null && maskedPixelInfo[xi + yi * width])
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool IsNothingToDraw(byte[] drawingPixel, int layerNum, bool isMaskedPixel)
+        {
+            if (drawingPixel.IsNotWhite()) { return false; }
+            if (layerNum == 0) { return false; }
+            if (isMaskedPixel) { return false; }
+
+            return true;
+        }
+
+        private bool IsAlphaBlendingApplicable(bool isMaskedPixel, bool excludeMask)
+        {
+            if (isMaskedPixel && excludeMask) { return false; }
+            return true;
         }
 
         internal bool IsImageFileUpdated()

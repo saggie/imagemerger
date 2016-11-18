@@ -205,6 +205,8 @@ namespace ImageMerger
             return pixel1[0] == pixel2[0] && pixel1[1] == pixel2[1] && pixel1[2] == pixel2[2];
         }
 
+        public static bool IsNotWhite(this byte[] pixel) { return !pixel.IsWhite(); }
+
         public static bool IsWhite(this byte[] pixel) { return pixel[0] ==  0xFF && pixel[1] ==  0xFF && pixel[2] ==  0xFF; }
         public static bool IsGray0(this byte[] pixel) { return pixel[0] == Gray0 && pixel[1] == Gray0 && pixel[2] == Gray0; }
         public static bool IsGray1(this byte[] pixel) { return pixel[0] == Gray1 && pixel[1] == Gray1 && pixel[2] == Gray1; }
@@ -214,6 +216,8 @@ namespace ImageMerger
         public static bool IsGray5(this byte[] pixel) { return pixel[0] == Gray5 && pixel[1] == Gray5 && pixel[2] == Gray5; }
 
         public static bool IsYellow(this byte[] pixel){ return pixel[0] == YellowB && pixel[1] == YellowG && pixel[2] == YellowR; }
+
+        public static byte[] GetWhite() { return new byte[] { 0xFF, 0xFF, 0xFF, 0xFF }; }
 
         private static byte[] GetGray0() { return new byte[] { Gray0, Gray0, Gray0, 0xFF }; }
         private static byte[] GetGray1() { return new byte[] { Gray1, Gray1, Gray1, 0xFF }; }
