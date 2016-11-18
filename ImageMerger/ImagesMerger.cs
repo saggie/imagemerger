@@ -16,6 +16,8 @@ namespace ImageMerger
         private ImageSettingsManager imageSettingsManager = new ImageSettingsManager();
         private ImageSettings settings;
 
+        private IList<ColorReplacementInfo> colorReplacementInfoList = new List<ColorReplacementInfo>();
+
         // Map: "image path" to "last write time"
         internal IDictionary<string, long> lastUpdateMap = new Dictionary<string, long>();
 
@@ -36,6 +38,12 @@ namespace ImageMerger
                 sourceImages.Add(LoadSourceImage(eachSettings));
             }
 
+            colorReplacementInfoList.Clear();
+            foreach (var eachColorReplacementSetting in settings.colorReplacement)
+            {
+                colorReplacementInfoList.Add(new ColorReplacementInfo(eachColorReplacementSetting));
+            }
+
             var maxWidth = sourceImages.Select(i => i.width).Max();
             var maxHeight = sourceImages.Select(i => i.height).Max();
 
@@ -47,11 +55,11 @@ namespace ImageMerger
             return settings.outputFileName;
         }
 
-        private SourceImageInfo LoadSourceImage(SourceImageSettings sourceImageInfo)
+        private SourceImageInfo LoadSourceImage(SourceImageSettings sourceImageSettings)
         {
             SourceImageInfo ret = new SourceImageInfo();
 
-            var filePath = Path.Combine(workingDirectoryPath, sourceImageInfo.fileName);
+            var filePath = Path.Combine(workingDirectoryPath, sourceImageSettings.fileName);
             using (Bitmap sourceBitmap = new Bitmap(Image.FromFile(filePath)))
             {
                 ret.width = sourceBitmap.Width;
@@ -60,10 +68,10 @@ namespace ImageMerger
                 ret.pixels = sourceBitmap.ToByteArray();
             }
 
-            ret.alphaValue = sourceImageInfo.alphaValue;
-            ret.isShadowLayer = sourceImageInfo.isShadow;
-            ret.maskedPixelsInfo = (sourceImageInfo.maskInfo != null)
-                ? PixelUtil.CreateMaskedPixelsInfo(ret.pixels, ret.width, ret.height, sourceImageInfo.maskInfo)
+            ret.alphaValue = sourceImageSettings.alphaValue;
+            ret.isShadowLayer = sourceImageSettings.isShadow;
+            ret.maskedPixelsInfo = (sourceImageSettings.maskInfo != null)
+                ? PixelUtil.CreateMaskedPixelsInfo(ret.pixels, ret.width, ret.height, sourceImageSettings.maskInfo)
                 : null;
 
             return ret;
@@ -127,6 +135,15 @@ namespace ImageMerger
                         {
                             var sourcePixel = mergedPixels.GetPixelAt(xi, yi, width);
                             drawingPixel = PixelUtil.GetShadowedPixel(sourcePixel);
+                        }
+
+                        // process color replacement
+                        foreach (var eachColorReplacementInfo in colorReplacementInfoList)
+                        {
+                            if (drawingPixel.IsSameRgb(eachColorReplacementInfo.from))
+                            {
+                                drawingPixel = eachColorReplacementInfo.to;
+                            }
                         }
 
                         // process alpha-blending

@@ -186,7 +186,7 @@ namespace ImageMerger
             return 0;
         }
 
-        private static byte[] ToPixelData(this string colorString)
+        public static byte[] ToPixelData(this string colorString)
         {
             var strR = colorString.Substring(colorString.Length - 6, 2);
             var strG = colorString.Substring(colorString.Length - 4, 2);
@@ -200,7 +200,7 @@ namespace ImageMerger
             };
         }
 
-        private static bool IsSameRgb(this byte[] pixel1, byte[] pixel2)
+        public static bool IsSameRgb(this byte[] pixel1, byte[] pixel2)
         {
             return pixel1[0] == pixel2[0] && pixel1[1] == pixel2[1] && pixel1[2] == pixel2[2];
         }

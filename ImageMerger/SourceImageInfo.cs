@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Drawing.Imaging;
+﻿using System.Drawing.Imaging;
 
 namespace ImageMerger
 {
@@ -12,5 +11,18 @@ namespace ImageMerger
         public bool[] maskedPixelsInfo;
         public float alphaValue;
         public bool isShadowLayer;
+        public ColorReplacementInfo colorReplacementInfo;
+    }
+
+    public class ColorReplacementInfo
+    {
+        public byte[] from;
+        public byte[] to;
+
+        public ColorReplacementInfo(ColorReplacementSettigns colorReplacementSettings)
+        {
+            from = colorReplacementSettings.from.ToPixelData();
+            to = colorReplacementSettings.to.ToPixelData();
+        }
     }
 }

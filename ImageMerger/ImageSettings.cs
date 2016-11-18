@@ -8,6 +8,7 @@ namespace ImageMerger
     {
         [DataMember] public string outputFileName { get; set; }
         [DataMember] public IList<SourceImageSettings> sourceImages { get; set; }
+        [DataMember] public IList<ColorReplacementSettigns> colorReplacement { get; set; }
     }
 
     [DataContract]
@@ -24,5 +25,12 @@ namespace ImageMerger
     {
        [DataMember] public string targetColor { get; set; }
        [DataMember] public int margin { get; set; }
+    }
+
+    [DataContract]
+    public class ColorReplacementSettigns
+    {
+        [DataMember] public string from { get; set; }
+        [DataMember] public string to { get; set; }
     }
 }
