@@ -7,11 +7,11 @@ namespace ImageMerger
     public class ImageSettings
     {
         [DataMember] public string outputFileName { get; set; }
-        [DataMember] public IList<SourceImageInfo> sourceImages { get; set; }
+        [DataMember] public IList<SourceImageSettings> sourceImages { get; set; }
     }
 
     [DataContract]
-    public class SourceImageInfo
+    public class SourceImageSettings
     {
         [DataMember] public string fileName { get; set; }
         [DataMember] public float alphaValue { get; set; }

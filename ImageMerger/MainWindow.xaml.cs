@@ -22,12 +22,12 @@ namespace ImageMerger
         {
             var dropFiles = e.Data.GetData(DataFormats.FileDrop) as string[];
             if (dropFiles == null) { return; }
-            imagesMerger.Init(dropFiles[0]);
+            imagesMerger.Initialize(dropFiles[0]);
 
             EnterRunningState();
 
             ShowFileNameAtWindowTitle(imagesMerger.GetFileName());
-            ResizeWindow(imagesMerger.margedImage.Width, imagesMerger.margedImage.Height);
+            ResizeWindow(imagesMerger.mergedImage.Width, imagesMerger.mergedImage.Height);
 
             RunUpdateChecker();
         }
@@ -61,7 +61,7 @@ namespace ImageMerger
                     if (imagesMerger.IsImageFileUpdated())
                     {
                         image.Dispatcher.BeginInvoke(new Action(() => UpdateImage()));
-                        imagesMerger.UpdateImageFilePathToLastWriteTimeMap();
+                        imagesMerger.UpdateLastUpdateMap();
                     }
                     Thread.Sleep(500);
                 }
@@ -74,7 +74,7 @@ namespace ImageMerger
 
             using (var stream = new MemoryStream())
             {
-                imagesMerger.margedImage.Save(stream, ImageFormat.Bmp);
+                imagesMerger.mergedImage.Save(stream, ImageFormat.Bmp);
                 stream.Seek(0, SeekOrigin.Begin);
                 image.Source = BitmapFrame.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
             }
@@ -100,7 +100,7 @@ namespace ImageMerger
                 {
                     if (hasElapsed3SecondsSinceLastSave())
                     {
-                        imagesMerger.Save();
+                        imagesMerger.SaveMergedImage();
                         lastSavedTime = DateTime.Now.Ticks;
                     }
                 }
@@ -109,7 +109,7 @@ namespace ImageMerger
 
         private bool hasElapsed3SecondsSinceLastSave()
         {
-            return (DateTime.Now.Ticks - lastSavedTime) > 30000000;
+            return (DateTime.Now.Ticks - lastSavedTime) > 3 * 1000 * 10000;
         }
 
         private void Window_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)

@@ -1,0 +1,4 @@
+jsonそれ自体も更新たいしょうにする
+alpha blending実装
+__VERSION__実装
+

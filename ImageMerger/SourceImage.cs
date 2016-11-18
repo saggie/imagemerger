@@ -3,7 +3,7 @@ using System.Drawing.Imaging;
 
 namespace ImageMerger
 {
-    public class SourceImage
+    public class SourceImageInfo
     {
         public byte[] pixels;
         public int width;

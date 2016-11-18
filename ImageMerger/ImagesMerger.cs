@@ -8,8 +8,7 @@ namespace ImageMerger
 {
     public class ImagesMerger
     {
-        public Bitmap margedImage;
-        private ImageFormat outputImageFormat;
+        internal Bitmap mergedImage;
 
         private string settingFilePath;
         private string workingDirectoryPath;
@@ -17,20 +16,21 @@ namespace ImageMerger
         private ImageSettingsManager imageSettingsManager = new ImageSettingsManager();
         private ImageSettings settings;
 
-        public IDictionary<string, long> imageFilePathToLastWriteTimeMap = new Dictionary<string, long>();
+        // Map: "image path" to "last write time"
+        internal IDictionary<string, long> lastUpdateMap = new Dictionary<string, long>();
 
-        public void Init(string settingFilePath)
+        internal void Initialize(string settingFilePath)
         {
             this.settingFilePath = settingFilePath;
             Refresh();
         }
 
-        public void Refresh()
+        internal void Refresh()
         {
             settings = imageSettingsManager.ReadSettings(settingFilePath);
             workingDirectoryPath = System.IO.Path.GetDirectoryName(settingFilePath);
 
-            var sourceImages = new List<SourceImage>();
+            var sourceImages = new List<SourceImageInfo>();
             foreach (var eachSettings in settings.sourceImages)
             {
                 sourceImages.Add(LoadSourceImage(eachSettings));
@@ -38,7 +38,6 @@ namespace ImageMerger
 
             var maxWidth = sourceImages.Select(i => i.width).Max();
             var maxHeight = sourceImages.Select(i => i.height).Max();
-            outputImageFormat = GetImageFormatFromFileExtension(settings.outputFileName);
 
             CreateMergedImage(sourceImages, maxWidth, maxHeight);
         }
@@ -48,9 +47,9 @@ namespace ImageMerger
             return settings.outputFileName;
         }
 
-        private SourceImage LoadSourceImage(SourceImageInfo sourceImageInfo)
+        private SourceImageInfo LoadSourceImage(SourceImageSettings sourceImageInfo)
         {
-            SourceImage ret = new SourceImage();
+            SourceImageInfo ret = new SourceImageInfo();
 
             var filePath = Path.Combine(workingDirectoryPath, sourceImageInfo.fileName);
             using (Bitmap sourceBitmap = new Bitmap(Image.FromFile(filePath)))
@@ -68,9 +67,16 @@ namespace ImageMerger
             return ret;
         }
 
-        internal void Save()
+        internal void SaveMergedImage()
         {
-            SaveMergedImage(settings.outputFileName, outputImageFormat);
+            var fileName = settings.outputFileName;
+            var filePath = Path.Combine(workingDirectoryPath, fileName);
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+            var fileFormat = GetImageFormatFromFileExtension(fileName);
+            mergedImage.Save(filePath, fileFormat);
         }
 
         private ImageFormat GetImageFormatFromFileExtension(string fileName)
@@ -85,7 +91,7 @@ namespace ImageMerger
             }
         }
 
-        private void CreateMergedImage(IList<SourceImage> sourceImages, int width, int height)
+        private void CreateMergedImage(IList<SourceImageInfo> sourceImages, int width, int height)
         {
             var mergedPixels = new byte[width * height * 4];
             bool isFirstLayer = true;
@@ -125,31 +131,16 @@ namespace ImageMerger
                 isFirstLayer = false;
             }
 
-            margedImage = mergedPixels.ToBitmap(width, height);
+            mergedImage = mergedPixels.ToBitmap(width, height);
         }
 
-        private void SaveMergedImage(string fileName, ImageFormat imageFormat)
+        internal bool IsImageFileUpdated()
         {
-            var filePath = Path.Combine(workingDirectoryPath, fileName);
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath);
-            }
-            margedImage.Save(filePath, imageFormat);
-        }
-
-        public void UpdateImageFilePathToLastWriteTimeMap()
-        {
-            imageFilePathToLastWriteTimeMap = CreateImageFilePathToLastWriteTimeMap();
-        }
-
-        public bool IsImageFileUpdated()
-        {
-            var latestMap = CreateImageFilePathToLastWriteTimeMap();
+            var latestMap = CreateLastUpdateMap();
             foreach (var eachImage in latestMap.Keys)
             {
-                if (!imageFilePathToLastWriteTimeMap.ContainsKey(eachImage) ||
-                    imageFilePathToLastWriteTimeMap[eachImage] != latestMap[eachImage])
+                if (!lastUpdateMap.ContainsKey(eachImage) ||
+                    lastUpdateMap[eachImage] != latestMap[eachImage])
                 {
                     return true;
                 }
@@ -157,7 +148,12 @@ namespace ImageMerger
             return false;
         }
 
-        private IDictionary<string, long> CreateImageFilePathToLastWriteTimeMap() {
+        internal void UpdateLastUpdateMap()
+        {
+            lastUpdateMap = CreateLastUpdateMap();
+        }
+
+        private IDictionary<string, long> CreateLastUpdateMap() {
             var ret = new Dictionary<string, long>();
             foreach (var eachSourceImage in settings.sourceImages)
             {
