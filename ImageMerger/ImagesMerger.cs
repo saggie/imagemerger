@@ -68,10 +68,12 @@ namespace ImageMerger
                 ret.pixels = sourceBitmap.ToByteArray();
             }
 
-            ret.alphaValue = sourceImageSettings.alphaValue;
+            ret.alphaInfo = (sourceImageSettings.alpha != null)
+                ? new AlphaInfo(sourceImageSettings.alpha)
+                : null;
             ret.isShadowLayer = sourceImageSettings.isShadow;
-            ret.maskedPixelsInfo = (sourceImageSettings.maskInfo != null)
-                ? PixelUtil.CreateMaskedPixelsInfo(ret.pixels, ret.width, ret.height, sourceImageSettings.maskInfo)
+            ret.maskedPixelsInfo = (sourceImageSettings.regionMask != null)
+                ? PixelUtil.CreateMaskedPixelsInfo(ret.pixels, ret.width, ret.height, sourceImageSettings.regionMask)
                 : null;
 
             return ret;
@@ -147,10 +149,13 @@ namespace ImageMerger
                         }
 
                         // process alpha-blending
-                        if (eachImage.alphaValue < 1 || eachImage.alphaValue > 0)
+                        if (eachImage.alphaInfo != null)
                         {
                             var sourcePixel = mergedPixels.GetPixelAt(xi, yi, width);
-                            drawingPixel = drawingPixel.BlendWith(sourcePixel, eachImage.alphaValue);
+                            if (!eachImage.alphaInfo.ignoreList.Contains(sourcePixel))
+                            {
+                                drawingPixel = drawingPixel.BlendWith(sourcePixel, eachImage.alphaInfo.value);
+                            }
                         }
 
                         mergedPixels[PixelUtil.GetAddressB(xi, yi, width)] = drawingPixel[0];

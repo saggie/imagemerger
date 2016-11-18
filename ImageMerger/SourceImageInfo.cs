@@ -1,4 +1,5 @@
-﻿using System.Drawing.Imaging;
+﻿using System.Collections.Generic;
+using System.Drawing.Imaging;
 
 namespace ImageMerger
 {
@@ -9,9 +10,25 @@ namespace ImageMerger
         public int height;
         public ImageFormat imageFormat;
         public bool[] maskedPixelsInfo;
-        public float alphaValue;
+        public AlphaInfo alphaInfo;
         public bool isShadowLayer;
         public ColorReplacementInfo colorReplacementInfo;
+    }
+
+    public class AlphaInfo
+    {
+        public float value;
+        public IList<byte[]> ignoreList;
+
+        public AlphaInfo(AlphaSettings alphaSettings)
+        {
+            value = alphaSettings.value;
+            ignoreList = new List<byte[]>();
+            foreach(var ignoringColor in alphaSettings.ignoreList)
+            {
+                ignoreList.Add(ignoringColor.ToPixelData());
+            }
+        }
     }
 
     public class ColorReplacementInfo

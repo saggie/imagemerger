@@ -107,7 +107,7 @@ namespace ImageMerger
             return GetBlack();
         }
 
-        public static bool[] CreateMaskedPixelsInfo(byte[] sourcePixels, int width, int height, IList<MaskInfo> maskInfoList)
+        public static bool[] CreateMaskedPixelsInfo(byte[] sourcePixels, int width, int height, IList<RegionMaskInfo> maskInfoList)
         {
             var ret = new bool[width * height];
 
@@ -174,7 +174,7 @@ namespace ImageMerger
             return false; // not hit at all
         }
 
-        private static int GetMargin(byte[] pixel, IList<MaskInfo> maskInfoList)
+        private static int GetMargin(byte[] pixel, IList<RegionMaskInfo> maskInfoList)
         {
             foreach (var eachMaskInfo in maskInfoList)
             {
