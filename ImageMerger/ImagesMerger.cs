@@ -129,6 +129,13 @@ namespace ImageMerger
                             drawingPixel = PixelUtil.GetShadowedPixel(sourcePixel);
                         }
 
+                        // process alpha-blending
+                        if (eachImage.alphaValue < 1 || eachImage.alphaValue > 0)
+                        {
+                            var sourcePixel = mergedPixels.GetPixelAt(xi, yi, width);
+                            drawingPixel = drawingPixel.BlendWith(sourcePixel, eachImage.alphaValue);
+                        }
+
                         mergedPixels[PixelUtil.GetAddressB(xi, yi, width)] = drawingPixel[0];
                         mergedPixels[PixelUtil.GetAddressG(xi, yi, width)] = drawingPixel[1];
                         mergedPixels[PixelUtil.GetAddressR(xi, yi, width)] = drawingPixel[2];

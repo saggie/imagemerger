@@ -80,7 +80,21 @@ namespace ImageMerger
             };
         }
 
-        internal static byte[] GetShadowedPixel(byte[] pixel)
+        public static byte[] BlendWith(this byte[] pixel1, byte[] pixel2, float alphaValue)
+        {
+            if (alphaValue >= 1) { return pixel1; }
+            if (alphaValue <= 0) { return pixel2; }
+
+            return new byte[]
+            {
+                (byte) (pixel1[0] * alphaValue + pixel2[0] * (1 - alphaValue)),
+                (byte) (pixel1[1] * alphaValue + pixel2[1] * (1 - alphaValue)),
+                (byte) (pixel1[2] * alphaValue + pixel2[2] * (1 - alphaValue)),
+                0xFF
+            };
+        }
+
+        public static byte[] GetShadowedPixel(byte[] pixel)
         {
             if (pixel.IsWhite()) { return GetGray1(); }
             if (pixel.IsGray0()) { return GetGray1(); }
