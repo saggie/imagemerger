@@ -9,8 +9,8 @@ namespace ImageMerger
         public int width;
         public int height;
         public ImageFormat imageFormat;
-        public IList<MaskInfo> maskInfoList;
+        public bool[] maskedPixelsInfo;
         public float alphaValue;
-        public bool isShadow;
+        public bool isShadowLayer;
     }
 }

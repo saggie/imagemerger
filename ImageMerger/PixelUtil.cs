@@ -69,7 +69,7 @@ namespace ImageMerger
         public static int GetAddressR(int addrX, int addrY, int width) { return (addrX + addrY * width) * 4 + 2; }
         public static int GetAddressA(int addrX, int addrY, int width) { return (addrX + addrY * width) * 4 + 3; }
 
-        public static byte[] GetPixel(byte[] sourcePixels, int addrX, int addrY, int width)
+        public static byte[] GetPixelAt(this byte[] sourcePixels, int addrX, int addrY, int width)
         {
             return new byte[]
             {
@@ -93,15 +93,15 @@ namespace ImageMerger
             return GetBlack();
         }
 
-        public static byte[] CreateMaskedPixels(byte[] sourcePixels, int width, int height, IList<MaskInfo> maskInfoList, byte[] maskValue)
+        public static bool[] CreateMaskedPixelsInfo(byte[] sourcePixels, int width, int height, IList<MaskInfo> maskInfoList)
         {
-            var ret = Copy(sourcePixels);
+            var ret = new bool[width * height];
 
             for (var yi = 0; yi < height; yi++)
             {
                 for (var xi = 0; xi < width; xi++)
                 {
-                    byte[] targetPixel = GetPixel(sourcePixels, xi, yi, width);
+                    byte[] targetPixel = sourcePixels.GetPixelAt(xi, yi, width);
                     if (targetPixel.IsWhite() ||
                         targetPixel.IsNotMaskTargetColor(maskInfoList.Select(m => m.targetColor))) { continue; }
 
@@ -123,13 +123,10 @@ namespace ImageMerger
                         {
                             if (xj >= width) { break; } // right-edge case
 
-                            var pixelToMask = GetPixel(sourcePixels, xj, yj, width);
+                            var pixelToMask = sourcePixels.GetPixelAt(xj, yj, width);
                             if (pixelToMask.IsWhite())
                             {
-                                ret[GetAddressB(xj, yj, width)] = maskValue[0];
-                                ret[GetAddressG(xj, yj, width)] = maskValue[1];
-                                ret[GetAddressR(xj, yj, width)] = maskValue[2];
-                                ret[GetAddressA(xj, yj, width)] = maskValue[3];
+                                ret[xj + yj * width] = true;
                             }
                         }
                     }

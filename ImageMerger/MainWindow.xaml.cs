@@ -58,7 +58,7 @@ namespace ImageMerger
             {
                 while (true)
                 {
-                    if (imagesMerger.IsImageFileUpdated())
+                    if (imagesMerger.IsImageFileUpdated()) // TODO add IsJsonFileUpdated()
                     {
                         image.Dispatcher.BeginInvoke(new Action(() => UpdateImage()));
                         imagesMerger.UpdateLastUpdateMap();

@@ -61,8 +61,10 @@ namespace ImageMerger
             }
 
             ret.alphaValue = sourceImageInfo.alphaValue;
-            ret.isShadow = sourceImageInfo.isShadow;
-            ret.maskInfoList = sourceImageInfo.maskInfo;
+            ret.isShadowLayer = sourceImageInfo.isShadow;
+            ret.maskedPixelsInfo = (sourceImageInfo.maskInfo != null)
+                ? PixelUtil.CreateMaskedPixelsInfo(ret.pixels, ret.width, ret.height, sourceImageInfo.maskInfo)
+                : null;
 
             return ret;
         }
@@ -94,41 +96,46 @@ namespace ImageMerger
         private void CreateMergedImage(IList<SourceImageInfo> sourceImages, int width, int height)
         {
             var mergedPixels = new byte[width * height * 4];
-            bool isFirstLayer = true;
+            bool isNotTheFirstLayer = false;
             foreach (var eachImage in sourceImages.Reverse())
             {
                 var sourcePixels = eachImage.pixels;
-                if (eachImage.maskInfoList != null)
-                {
-                    sourcePixels = PixelUtil.CreateMaskedPixels(
-                            sourcePixels, eachImage.width, eachImage.height, eachImage.maskInfoList,
-                            PixelUtil.GetCyan());
-                }
 
                 // merge images
                 for (var yi = 0; yi < eachImage.height; yi++)
                 {
                     for (var xi = 0; xi < eachImage.width; xi++)
                     {
-                        var pixel = PixelUtil.GetPixel(sourcePixels, xi, yi, eachImage.width);
-
-                        // skip if nothing to draw (from 2nd layer)
-                        if (!isFirstLayer && pixel.IsWhite()) { continue; }
-
-                        // process shadowing
-                        if (eachImage.isShadow && !pixel.IsWhite())
+                        // process region-mask
+                        if (eachImage.maskedPixelsInfo != null &&
+                            eachImage.maskedPixelsInfo[xi + yi * eachImage.width])
                         {
-                            var sourcePixel = PixelUtil.GetPixel(mergedPixels, xi, yi, width);
-                            pixel = PixelUtil.GetShadowedPixel(sourcePixel);
+                            mergedPixels[PixelUtil.GetAddressB(xi, yi, width)] = 0xFF;
+                            mergedPixels[PixelUtil.GetAddressG(xi, yi, width)] = 0xFF;
+                            mergedPixels[PixelUtil.GetAddressR(xi, yi, width)] = 0xFF;
+                            mergedPixels[PixelUtil.GetAddressA(xi, yi, width)] = 0xFF;
+                            continue;
                         }
 
-                        mergedPixels[PixelUtil.GetAddressB(xi, yi, width)] = pixel[0];
-                        mergedPixels[PixelUtil.GetAddressG(xi, yi, width)] = pixel[1];
-                        mergedPixels[PixelUtil.GetAddressR(xi, yi, width)] = pixel[2];
-                        mergedPixels[PixelUtil.GetAddressA(xi, yi, width)] = pixel[3];
+                        var drawingPixel = sourcePixels.GetPixelAt(xi, yi, eachImage.width);
+
+                        // skip if nothing to draw
+                        if (drawingPixel.IsWhite() && isNotTheFirstLayer) { continue; }
+
+                        // process shadowing
+                        if (eachImage.isShadowLayer && !drawingPixel.IsWhite())
+                        {
+                            var sourcePixel = mergedPixels.GetPixelAt(xi, yi, width);
+                            drawingPixel = PixelUtil.GetShadowedPixel(sourcePixel);
+                        }
+
+                        mergedPixels[PixelUtil.GetAddressB(xi, yi, width)] = drawingPixel[0];
+                        mergedPixels[PixelUtil.GetAddressG(xi, yi, width)] = drawingPixel[1];
+                        mergedPixels[PixelUtil.GetAddressR(xi, yi, width)] = drawingPixel[2];
+                        mergedPixels[PixelUtil.GetAddressA(xi, yi, width)] = drawingPixel[3];
                     }
                 }
-                isFirstLayer = false;
+                isNotTheFirstLayer = true;
             }
 
             mergedImage = mergedPixels.ToBitmap(width, height);
