@@ -25,9 +25,12 @@ namespace ImageMerger
         {
             value = alphaSettings.value;
             ignoreList = new List<byte[]>();
-            foreach(var ignoringColor in alphaSettings.ignoreList)
+            if (alphaSettings.ignoreList != null)
             {
-                ignoreList.Add(ignoringColor.ToPixelData());
+                foreach (var ignoringColor in alphaSettings.ignoreList)
+                {
+                    ignoreList.Add(ignoringColor.ToPixelData());
+                }
             }
             excludeMask = alphaSettings.excludeMask;
         }

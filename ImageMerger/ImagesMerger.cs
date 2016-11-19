@@ -37,9 +37,12 @@ namespace ImageMerger
             sourceImagesManager.refreshSourceImages(settings.sourceImages, workingDirectoryPath);
 
             colorReplacementInfoList.Clear();
-            foreach (var eachColorReplacementSetting in settings.colorReplacement)
+            if (settings.colorReplacement != null)
             {
-                colorReplacementInfoList.Add(new ColorReplacementInfo(eachColorReplacementSetting));
+                foreach (var eachColorReplacementSetting in settings.colorReplacement)
+                {
+                    colorReplacementInfoList.Add(new ColorReplacementInfo(eachColorReplacementSetting));
+                }
             }
 
             CreateMergedImage(sourceImagesManager.sourceImages,
@@ -122,7 +125,7 @@ namespace ImageMerger
                         if (eachImage.alphaInfo != null)
                         {
                             var alphaInfo = eachImage.alphaInfo;
-                            if (IsAlphaBlendingApplicable(isMaskedPixel, alphaInfo.excludeMask))
+                            if (IsAlphaBlendingApplicable(isMaskedPixel, alphaInfo.excludeMask, layerNum))
                             {
                                 var sourcePixel = mergedPixels.GetPixelAt(xi, yi, width);
                                 if (!eachImage.alphaInfo.ignoreList.Contains(sourcePixel))
@@ -162,8 +165,9 @@ namespace ImageMerger
             return true;
         }
 
-        private bool IsAlphaBlendingApplicable(bool isMaskedPixel, bool excludeMask)
+        private bool IsAlphaBlendingApplicable(bool isMaskedPixel, bool excludeMask, int layerNum)
         {
+            if (layerNum == 0) { return false; }
             if (isMaskedPixel && excludeMask) { return false; }
             return true;
         }

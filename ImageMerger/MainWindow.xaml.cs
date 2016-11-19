@@ -122,5 +122,9 @@ namespace ImageMerger
                 case System.Windows.Input.Key.RightCtrl: ctrl_key_pressed = false; break;
             }
         }
+
+        private void textBlock3_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+        }
     }
 }
