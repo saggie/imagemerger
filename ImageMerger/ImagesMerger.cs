@@ -10,7 +10,7 @@ namespace ImageMerger
     {
         internal Bitmap mergedImage;
 
-        private string settingFilePath;
+        private string settingsFilePath;
         private string workingDirectoryPath;
 
         private ImageSettingsManager imageSettingsManager = new ImageSettingsManager();
@@ -18,19 +18,19 @@ namespace ImageMerger
 
         private IList<ColorReplacementInfo> colorReplacementInfoList = new List<ColorReplacementInfo>();
 
-        // Map: "image path" to "last write time"
+        // Map: "image/settings file path" -> "last write time"
         internal IDictionary<string, long> lastUpdateMap = new Dictionary<string, long>();
 
-        internal void Initialize(string settingFilePath)
+        internal void Initialize(string settingsFilePath)
         {
-            this.settingFilePath = settingFilePath;
+            this.settingsFilePath = settingsFilePath;
             Refresh();
         }
 
         internal void Refresh()
         {
-            settings = imageSettingsManager.ReadSettings(settingFilePath);
-            workingDirectoryPath = System.IO.Path.GetDirectoryName(settingFilePath);
+            settings = imageSettingsManager.ReadSettings(settingsFilePath);
+            workingDirectoryPath = System.IO.Path.GetDirectoryName(settingsFilePath);
 
             var sourceImages = new List<SourceImageInfo>();
             foreach (var eachSettings in settings.sourceImages)
@@ -50,7 +50,7 @@ namespace ImageMerger
             CreateMergedImage(sourceImages, maxWidth, maxHeight);
         }
 
-        internal string GetFileName()
+        internal string GetOutputFileName()
         {
             return settings.outputFileName;
         }
@@ -195,7 +195,7 @@ namespace ImageMerger
             return true;
         }
 
-        internal bool IsImageFileUpdated()
+        internal bool IsFileUpdated()
         {
             var latestMap = CreateLastUpdateMap();
             foreach (var eachImage in latestMap.Keys)
@@ -216,11 +216,17 @@ namespace ImageMerger
 
         private IDictionary<string, long> CreateLastUpdateMap() {
             var ret = new Dictionary<string, long>();
+
+            // for settings file
+            ret[settingsFilePath] = File.GetLastWriteTime(settingsFilePath).Ticks;
+
+            // for image files
             foreach (var eachSourceImage in settings.sourceImages)
             {
                 var filePath = Path.Combine(workingDirectoryPath, eachSourceImage.fileName);
                 ret[filePath] = File.GetLastWriteTime(filePath).Ticks;
             }
+
             return ret;
         }
     }

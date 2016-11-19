@@ -26,7 +26,7 @@ namespace ImageMerger
 
             EnterRunningState();
 
-            ShowFileNameAtWindowTitle(imagesMerger.GetFileName());
+            ShowFileNameAtWindowTitle(imagesMerger.GetOutputFileName());
             ResizeWindow(imagesMerger.mergedImage.Width, imagesMerger.mergedImage.Height);
 
             RunUpdateChecker();
@@ -58,10 +58,11 @@ namespace ImageMerger
             {
                 while (true)
                 {
-                    if (imagesMerger.IsImageFileUpdated()) // TODO add IsJsonFileUpdated()
+                    if (imagesMerger.IsFileUpdated())
                     {
                         image.Dispatcher.BeginInvoke(new Action(() => UpdateImage()));
                         imagesMerger.UpdateLastUpdateMap();
+
                     }
                     Thread.Sleep(500);
                 }
