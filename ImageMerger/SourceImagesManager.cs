@@ -55,7 +55,7 @@ namespace ImageMerger
             ret.fileName = versionedFileName ?? sourceImageSettings.fileName;
             var filePath = Path.Combine(workingDirectoryPath, ret.fileName);
 
-            using (Bitmap sourceBitmap = new Bitmap(Image.FromFile(filePath)))
+            using (Bitmap sourceBitmap = new Bitmap(Image.FromFile(filePath))) // TODO handle the case when the file is missing
             {
                 ret.width = sourceBitmap.Width;
                 ret.height = sourceBitmap.Height;

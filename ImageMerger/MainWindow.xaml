@@ -9,6 +9,7 @@
         SizeToContent="WidthAndHeight" ResizeMode="NoResize"
         AllowDrop="True" Drop="OnFileDrop"
         KeyDown="Window_KeyDown" KeyUp="Window_KeyUp"
+        Icon="/ImageMerger;component/Resources/icon.png"
         >
     <StackPanel Name="stackPanel" HorizontalAlignment="Center" VerticalAlignment="Center" Width="320" Height="240">
         <Image Name="image" Stretch="None" Width="auto" Height="auto" Visibility="Hidden"/>
