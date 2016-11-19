@@ -57,6 +57,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="SourceImagesManager.cs" />
     <Compile Include="ImagesMerger.cs" />
     <Compile Include="ImageSettings.cs" />
     <Compile Include="ImageSettingsManager.cs" />

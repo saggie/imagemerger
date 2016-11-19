@@ -16,6 +16,8 @@ namespace ImageMerger
         private ImageSettingsManager imageSettingsManager = new ImageSettingsManager();
         private ImageSettings settings;
 
+        private SourceImagesManager sourceImagesManager = new SourceImagesManager();
+
         private IList<ColorReplacementInfo> colorReplacementInfoList = new List<ColorReplacementInfo>();
 
         // Map: "image/settings file path" -> "last write time"
@@ -30,13 +32,9 @@ namespace ImageMerger
         internal void Refresh()
         {
             settings = imageSettingsManager.ReadSettings(settingsFilePath);
-            workingDirectoryPath = System.IO.Path.GetDirectoryName(settingsFilePath);
+            workingDirectoryPath = Path.GetDirectoryName(settingsFilePath);
 
-            var sourceImages = new List<SourceImageInfo>();
-            foreach (var eachSettings in settings.sourceImages)
-            {
-                sourceImages.Add(LoadSourceImage(eachSettings));
-            }
+            sourceImagesManager.refreshSourceImages(settings.sourceImages, workingDirectoryPath);
 
             colorReplacementInfoList.Clear();
             foreach (var eachColorReplacementSetting in settings.colorReplacement)
@@ -44,39 +42,14 @@ namespace ImageMerger
                 colorReplacementInfoList.Add(new ColorReplacementInfo(eachColorReplacementSetting));
             }
 
-            var maxWidth = sourceImages.Select(i => i.width).Max();
-            var maxHeight = sourceImages.Select(i => i.height).Max();
-
-            CreateMergedImage(sourceImages, maxWidth, maxHeight);
+            CreateMergedImage(sourceImagesManager.sourceImages,
+                              sourceImagesManager.GetMaxWidth(),
+                              sourceImagesManager.GetMaxHeight());
         }
 
         internal string GetOutputFileName()
         {
             return settings.outputFileName;
-        }
-
-        private SourceImageInfo LoadSourceImage(SourceImageSettings sourceImageSettings)
-        {
-            SourceImageInfo ret = new SourceImageInfo();
-
-            var filePath = Path.Combine(workingDirectoryPath, sourceImageSettings.fileName);
-            using (Bitmap sourceBitmap = new Bitmap(Image.FromFile(filePath)))
-            {
-                ret.width = sourceBitmap.Width;
-                ret.height = sourceBitmap.Height;
-                ret.imageFormat = GetImageFormatFromFileExtension(filePath);
-                ret.pixels = sourceBitmap.ToByteArray();
-            }
-
-            ret.alphaInfo = (sourceImageSettings.alpha != null)
-                ? new AlphaInfo(sourceImageSettings.alpha)
-                : null;
-            ret.isShadowLayer = sourceImageSettings.isShadow;
-            ret.maskedPixelsInfo = (sourceImageSettings.regionMask != null)
-                ? PixelUtil.CreateMaskedPixelsInfo(ret.pixels, ret.width, ret.height, sourceImageSettings.regionMask)
-                : null;
-
-            return ret;
         }
 
         internal void SaveMergedImage()
@@ -221,9 +194,9 @@ namespace ImageMerger
             ret[settingsFilePath] = File.GetLastWriteTime(settingsFilePath).Ticks;
 
             // for image files
-            foreach (var eachSourceImage in settings.sourceImages)
+            foreach (var eachFileName in sourceImagesManager.GetFileNames())
             {
-                var filePath = Path.Combine(workingDirectoryPath, eachSourceImage.fileName);
+                var filePath = Path.Combine(workingDirectoryPath, eachFileName);
                 ret[filePath] = File.GetLastWriteTime(filePath).Ticks;
             }
 

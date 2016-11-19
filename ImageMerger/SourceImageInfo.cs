@@ -5,10 +5,10 @@ namespace ImageMerger
 {
     public class SourceImageInfo
     {
+        public string fileName;
         public byte[] pixels;
         public int width;
         public int height;
-        public ImageFormat imageFormat;
         public bool[] maskedPixelsInfo;
         public AlphaInfo alphaInfo;
         public bool isShadowLayer;
