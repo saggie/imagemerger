@@ -32,6 +32,15 @@ namespace ImageMerger
             }
         }
 
+        private void HandleAutoSaveAndExit()
+        {
+            if (imagesMerger.GetAutoSaveAndExitOption() == true)
+            {
+                SaveOutputImage();
+                Application.Current.Shutdown();
+            }
+        }
+
         private void OnFileDrop(object sender, DragEventArgs e)
         {
             var dropFiles = e.Data.GetData(DataFormats.FileDrop) as string[];
@@ -58,6 +67,8 @@ namespace ImageMerger
 
             SaveLastLoadedFile(settingFilePath);
             RunUpdateChecker();
+
+            HandleAutoSaveAndExit();
 
             ShowInfoMessage("Load completed.");
         }

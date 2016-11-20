@@ -9,6 +9,7 @@ namespace ImageMerger
         [DataMember] public string outputFileName { get; set; }
         [DataMember] public IList<SourceImageSettings> sourceImages { get; set; }
         [DataMember] public IList<ColorReplacementSettigns> colorReplacement { get; set; }
+        [DataMember] public bool autoSaveAndExit { get; set; }
     }
 
     [DataContract]

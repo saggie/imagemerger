@@ -51,6 +51,11 @@ namespace ImageMerger
             UpdateLastUpdateMap();
         }
 
+        internal bool GetAutoSaveAndExitOption()
+        {
+            return settings.autoSaveAndExit;
+        }
+
         internal string GetOutputFileName()
         {
             return settings.outputFileName;
