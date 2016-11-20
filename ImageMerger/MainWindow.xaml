@@ -31,11 +31,13 @@
             </TextBlock.Foreground>
         </TextBlock>
 
-        <StatusBar Name="statusBar" VerticalAlignment="Bottom" Visibility="Collapsed">
+        <Rectangle Name="marginForStatusBar" Fill="White" Height="20" Stroke="White"/>
+
+        <StatusBar Name="statusBar" Visibility="Collapsed">
             <StatusBarItem>
                 <TextBlock x:Name="statusBarText" Text=""/>
             </StatusBarItem>
         </StatusBar>
-        
+
     </StackPanel>
 </Window>

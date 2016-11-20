@@ -17,6 +17,19 @@ namespace ImageMerger
         {
             InitializeComponent();
             GetLastLoadedFilePath();
+            HandleFileDropToExe();
+        }
+
+        private void HandleFileDropToExe()
+        {
+            if (Environment.GetCommandLineArgs().Length > 1)
+            {
+                var droppedFilePath = Environment.GetCommandLineArgs()[1];
+                if (File.Exists(droppedFilePath))
+                {
+                    Initialize(droppedFilePath);
+                }
+            }
         }
 
         private void OnFileDrop(object sender, DragEventArgs e)
@@ -28,7 +41,15 @@ namespace ImageMerger
 
         private void Initialize(string settingFilePath)
         {
-            imagesMerger.Initialize(settingFilePath);
+            try
+            {
+                imagesMerger.Initialize(settingFilePath);
+            }
+            catch (InvalidSettingsFileException)
+            {
+                ShowErrorMessage("Settings file is not valid.");
+                return;
+            }
 
             EnterRunningState();
             ShowMergedImage();
@@ -48,6 +69,7 @@ namespace ImageMerger
             textBlock1.Visibility = Visibility.Collapsed;
             textBlock2.Visibility = Visibility.Collapsed;
             textBlock3.Visibility = Visibility.Collapsed;
+            marginForStatusBar.Visibility = Visibility.Collapsed;
 
             image.Visibility = Visibility.Visible;
             statusBar.Visibility = Visibility.Visible;

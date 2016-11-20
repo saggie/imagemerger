@@ -1,0 +1,8 @@
+{
+    "outputFileName": "icon.png",
+    "sourceImages": [
+        { "fileName": "02.png", "alpha": { "value": 0.65 } },
+        { "fileName": "01.png", "alpha": { "value": 0.75 } },
+        { "fileName": "00.png"}
+    ]
+}

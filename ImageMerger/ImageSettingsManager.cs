@@ -20,17 +20,28 @@ namespace ImageMerger
             }
 
             var streamedContent = new MemoryStream(Encoding.UTF8.GetBytes(fileContent));
-            return (ImageSettings)serializer.ReadObject(streamedContent);
+
+            ImageSettings ret = null;
+            try
+            {
+                ret = (ImageSettings)serializer.ReadObject(streamedContent);
+            }
+            catch (Exception)
+            {
+                throw new InvalidSettingsFileException();
+            }
+
+            return ret;
         }
 
         private void ValidateFile(string settingFilePath)
         {
             if (Path.GetExtension(settingFilePath).ToLower() != ".json")
             {
-                throw new Exception(); // FIXME
+                throw new InvalidSettingsFileException();
             }
 
-            return; // TODO add more strict validation
+            return;
         }
     }
 }
