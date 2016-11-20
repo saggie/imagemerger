@@ -177,16 +177,18 @@ namespace ImageMerger
         #endregion
 
         private static object saveLock = new object();
+        private bool saveFirstTime = true;
         private long lastSavedTime = DateTime.Now.Ticks;
 
         private void SaveOutputImage()
         {
             lock (saveLock)
             {
-                if (hasElapsed3SecondsSinceLastSave())
+                if (saveFirstTime || hasElapsed3SecondsSinceLastSave())
                 {
                     imagesMerger.SaveMergedImage();
                     lastSavedTime = DateTime.Now.Ticks;
+                    saveFirstTime = false;
                     ShowInfoMessage("Save completed.");
                 }
             }
