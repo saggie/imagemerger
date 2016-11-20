@@ -60,6 +60,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="IniFileManager.cs" />
     <Compile Include="SourceImagesManager.cs" />
     <Compile Include="ImagesMerger.cs" />
     <Compile Include="ImageSettings.cs" />

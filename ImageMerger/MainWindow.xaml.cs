@@ -16,19 +16,26 @@ namespace ImageMerger
         public MainWindow()
         {
             InitializeComponent();
+            GetLastLoadedFilePath();
         }
 
         private void OnFileDrop(object sender, DragEventArgs e)
         {
             var dropFiles = e.Data.GetData(DataFormats.FileDrop) as string[];
             if (dropFiles == null) { return; }
-            imagesMerger.Initialize(dropFiles[0]);
+            Initialize(dropFiles[0]);
+        }
+
+        private void Initialize(string settingFilePath)
+        {
+            imagesMerger.Initialize(settingFilePath);
 
             EnterRunningState();
 
             ShowFileNameAtWindowTitle(imagesMerger.GetOutputFileName());
             ResizeWindow(imagesMerger.mergedImage.Width, imagesMerger.mergedImage.Height);
 
+            SaveLastLoadedFile(settingFilePath);
             RunUpdateChecker();
         }
 
@@ -64,7 +71,7 @@ namespace ImageMerger
                         imagesMerger.UpdateLastUpdateMap();
 
                     }
-                    Thread.Sleep(500);
+                    Thread.Sleep(1000);
                 }
             });
         }
@@ -123,8 +130,44 @@ namespace ImageMerger
             }
         }
 
+        private const string iniFileName = "settings.ini";
+        private static string iniFilePath;
+        private static string appName;
+        private string lastLoadedFilePath;
+
+        private void SaveLastLoadedFile(string settingFilePath)
+        {
+            IniFileManager.WriteToFile(iniFilePath, appName, "LastLoadedFilePath", settingFilePath);
+        }
+
+        private void GetLastLoadedFilePath()
+        {
+            GetIniFilePath();
+            var settingFilePath = IniFileManager.ReadFromFile(iniFilePath, appName, "LastLoadedFilePath");
+            if (File.Exists(settingFilePath))
+            {
+                this.lastLoadedFilePath = settingFilePath;
+                textBlock3.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void GetIniFilePath()
+        {
+            var exePath = Environment.GetCommandLineArgs()[0];
+            var exeFullPath = Path.GetFullPath(exePath);
+            appName = Path.GetFileNameWithoutExtension(exePath);
+
+            iniFilePath = Path.Combine(Path.GetDirectoryName(exeFullPath), iniFileName);
+        }
+
         private void textBlock3_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            Initialize(lastLoadedFilePath);
+        }
+
+        private void ShowErrorMessage(string errorMessage)
+        {
+            textBlock4.Text = string.Format("Error: {0}", errorMessage);
         }
     }
 }

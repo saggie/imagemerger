@@ -25,7 +25,7 @@
             </TextBlock.Foreground>
         </TextBlock>
         <TextBlock x:Name="textBlock3" TextWrapping="Wrap" Text="Alternatively, click here to load last loaded file." HorizontalAlignment="Center"
-                   TextDecorations="Underline" MouseLeftButtonDown="textBlock3_MouseLeftButtonDown">
+                   TextDecorations="Underline" MouseLeftButtonDown="textBlock3_MouseLeftButtonDown" Visibility="Hidden">
             <TextBlock.Foreground>
                 <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.GrayTextColorKey}}"/>
             </TextBlock.Foreground>
