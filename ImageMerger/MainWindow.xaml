@@ -30,6 +30,12 @@
                 <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.GrayTextColorKey}}"/>
             </TextBlock.Foreground>
         </TextBlock>
-        <TextBlock x:Name="textBlock4" TextWrapping="Wrap" Text=""/>
+
+        <StatusBar Name="statusBar" VerticalAlignment="Bottom" Visibility="Collapsed">
+            <StatusBarItem>
+                <TextBlock x:Name="statusBarText" Text=""/>
+            </StatusBarItem>
+        </StatusBar>
+        
     </StackPanel>
 </Window>

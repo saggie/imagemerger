@@ -48,6 +48,7 @@ namespace ImageMerger
             CreateMergedImage(sourceImagesManager.sourceImages,
                               sourceImagesManager.GetMaxWidth(),
                               sourceImagesManager.GetMaxHeight());
+            UpdateLastUpdateMap();
         }
 
         internal string GetOutputFileName()

@@ -31,21 +31,26 @@ namespace ImageMerger
             imagesMerger.Initialize(settingFilePath);
 
             EnterRunningState();
-
+            ShowMergedImage();
             ShowFileNameAtWindowTitle(imagesMerger.GetOutputFileName());
             ResizeWindow(imagesMerger.mergedImage.Width, imagesMerger.mergedImage.Height);
 
             SaveLastLoadedFile(settingFilePath);
             RunUpdateChecker();
+
+            ShowInfoMessage("Load completed.");
         }
 
         public void EnterRunningState()
         {
             Background = new SolidColorBrush(Colors.Black);
 
-            textBlock1.Visibility = Visibility.Hidden;
-            textBlock2.Visibility = Visibility.Hidden;
+            textBlock1.Visibility = Visibility.Collapsed;
+            textBlock2.Visibility = Visibility.Collapsed;
+            textBlock3.Visibility = Visibility.Collapsed;
+
             image.Visibility = Visibility.Visible;
+            statusBar.Visibility = Visibility.Visible;
         }
 
         private void ShowFileNameAtWindowTitle(string fileName)
@@ -56,7 +61,7 @@ namespace ImageMerger
         private void ResizeWindow(int width, int height)
         {
             stackPanel.Width = width;
-            stackPanel.Height = height;
+            stackPanel.Height = height + statusBar.Height;
         }
 
         public void RunUpdateChecker()
@@ -67,19 +72,23 @@ namespace ImageMerger
                 {
                     if (imagesMerger.IsFileUpdated())
                     {
-                        image.Dispatcher.BeginInvoke(new Action(() => UpdateImage()));
-                        imagesMerger.UpdateLastUpdateMap();
-
+                        image.Dispatcher.BeginInvoke(new Action(() => UpdateMergedImage()));
                     }
-                    Thread.Sleep(1000);
+                    Thread.Sleep(1500);
                 }
             });
         }
 
-        private void UpdateImage()
+        private void UpdateMergedImage()
         {
             imagesMerger.Refresh();
+            ShowMergedImage();
 
+            ShowInfoMessage("Updated.");
+        }
+
+        private void ShowMergedImage()
+        {
             using (var stream = new MemoryStream())
             {
                 imagesMerger.mergedImage.Save(stream, ImageFormat.Bmp);
@@ -88,30 +97,31 @@ namespace ImageMerger
             }
         }
 
+        #region Keys
+
         private bool s_key_pressed;
+        private bool r_key_pressed;
         private bool ctrl_key_pressed;
-        private static object saveLock = new object();
-        private static long lastSavedTime = DateTime.Now.Ticks;
 
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             switch (e.Key)
             {
+                case System.Windows.Input.Key.R:         r_key_pressed    = true; break;
                 case System.Windows.Input.Key.S:         s_key_pressed    = true; break;
                 case System.Windows.Input.Key.LeftCtrl:  ctrl_key_pressed = true; break;
                 case System.Windows.Input.Key.RightCtrl: ctrl_key_pressed = true; break;
             }
 
+            // Manually update
+            if (r_key_pressed && ctrl_key_pressed)
+            {
+                image.Dispatcher.BeginInvoke(new Action(() => UpdateMergedImage()));
+            }
+
             if (s_key_pressed && ctrl_key_pressed)
             {
-                lock (saveLock)
-                {
-                    if (hasElapsed3SecondsSinceLastSave())
-                    {
-                        imagesMerger.SaveMergedImage();
-                        lastSavedTime = DateTime.Now.Ticks;
-                    }
-                }
+                SaveOutputImage();
             }
         }
 
@@ -124,9 +134,28 @@ namespace ImageMerger
         {
             switch (e.Key)
             {
+                case System.Windows.Input.Key.R:         r_key_pressed    = false; break;
                 case System.Windows.Input.Key.S:         s_key_pressed    = false; break;
                 case System.Windows.Input.Key.LeftCtrl:  ctrl_key_pressed = false; break;
                 case System.Windows.Input.Key.RightCtrl: ctrl_key_pressed = false; break;
+            }
+        }
+
+        #endregion
+
+        private static object saveLock = new object();
+        private long lastSavedTime = DateTime.Now.Ticks;
+
+        private void SaveOutputImage()
+        {
+            lock (saveLock)
+            {
+                if (hasElapsed3SecondsSinceLastSave())
+                {
+                    imagesMerger.SaveMergedImage();
+                    lastSavedTime = DateTime.Now.Ticks;
+                    ShowInfoMessage("Save completed.");
+                }
             }
         }
 
@@ -165,9 +194,16 @@ namespace ImageMerger
             Initialize(lastLoadedFilePath);
         }
 
+        private void ShowInfoMessage(string infoMessage)
+        {
+            statusBar.Visibility = Visibility.Visible;
+            statusBarText.Text = string.Format("Info: {0} [{1}]", infoMessage, DateTime.Now);
+        }
+
         private void ShowErrorMessage(string errorMessage)
         {
-            textBlock4.Text = string.Format("Error: {0}", errorMessage);
+            statusBar.Visibility = Visibility.Visible;
+            statusBarText.Text = string.Format("Error: {0} [{1}]", errorMessage, DateTime.Now);
         }
     }
 }
