@@ -125,13 +125,10 @@ namespace ImageMerger
                         if (eachImage.alphaInfo != null)
                         {
                             var alphaInfo = eachImage.alphaInfo;
-                            if (IsAlphaBlendingApplicable(isMaskedPixel, alphaInfo.excludeMask, layerNum))
+                            if (IsAlphaBlendingApplicable(drawingPixel, isMaskedPixel, alphaInfo, layerNum))
                             {
                                 var sourcePixel = mergedPixels.GetPixelAt(xi, yi, width);
-                                if (!eachImage.alphaInfo.ignoreList.Contains(sourcePixel))
-                                {
-                                    drawingPixel = drawingPixel.BlendWith(sourcePixel, eachImage.alphaInfo.value);
-                                }
+                                drawingPixel = drawingPixel.BlendWith(sourcePixel, eachImage.alphaInfo.value);
                             }
                         }
 
@@ -165,10 +162,12 @@ namespace ImageMerger
             return true;
         }
 
-        private bool IsAlphaBlendingApplicable(bool isMaskedPixel, bool excludeMask, int layerNum)
+        private bool IsAlphaBlendingApplicable(byte[] drawingPixel, bool isMaskedPixel, AlphaInfo alphaInfo, int layerNum)
         {
             if (layerNum == 0) { return false; }
-            if (isMaskedPixel && excludeMask) { return false; }
+            if (isMaskedPixel && alphaInfo.excludeMask) { return false; }
+            if (alphaInfo.ignoreList.ContainsSameRgb(drawingPixel)) { return false; }
+
             return true;
         }
 

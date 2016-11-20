@@ -200,6 +200,18 @@ namespace ImageMerger
             };
         }
 
+        public static bool ContainsSameRgb(this IList<byte[]> pixels, byte[] pixel)
+        {
+            foreach (var eachPixel in pixels)
+            {
+                if (eachPixel.IsSameRgb(pixel))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public static bool IsSameRgb(this byte[] pixel1, byte[] pixel2)
         {
             return pixel1[0] == pixel2[0] && pixel1[1] == pixel2[1] && pixel1[2] == pixel2[2];
