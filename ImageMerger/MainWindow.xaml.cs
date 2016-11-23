@@ -63,7 +63,7 @@ namespace ImageMerger
             EnterRunningState();
             ShowMergedImage();
             ShowFileNameAtWindowTitle(imagesMerger.GetOutputFileName());
-            ResizeWindow(imagesMerger.mergedImage.Width, imagesMerger.mergedImage.Height);
+            ResizeWindow();
 
             SaveLastLoadedFile(settingFilePath);
             RunUpdateChecker();
@@ -91,10 +91,10 @@ namespace ImageMerger
             Title = fileName + " - " + this.Title;
         }
 
-        private void ResizeWindow(int width, int height)
+        private void ResizeWindow()
         {
-            stackPanel.Width = width;
-            stackPanel.Height = height + statusBar.Height;
+            stackPanel.Width = image.Width;
+            stackPanel.Height = image.Height + statusBar.Height;
         }
 
         public void RunUpdateChecker()

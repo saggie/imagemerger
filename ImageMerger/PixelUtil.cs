@@ -11,12 +11,16 @@ namespace ImageMerger
     {
         #region Constants
 
+        private const byte White = 0xFF;
+
         private const byte Gray0 = 0xEB;
         private const byte Gray1 = 0xDC;
         private const byte Gray2 = 0xB4;
         private const byte Gray3 = 0x78;
         private const byte Gray4 = 0x46;
         private const byte Gray5 = 0x28;
+
+        private const byte Black = 0x00;
 
         private const byte CyanR = 0x00;
         private const byte CyanG = 0xFF;
@@ -96,15 +100,41 @@ namespace ImageMerger
 
         public static byte[] GetShadowedPixel(byte[] pixel)
         {
-            if (pixel.IsWhite()) { return GetGray1(); }
-            if (pixel.IsGray0()) { return GetGray1(); }
-            if (pixel.IsGray1()) { return GetGray2(); }
-            if (pixel.IsGray2()) { return GetGray3(); }
-            if (pixel.IsGray3()) { return GetGray4(); }
-            if (pixel.IsGray4()) { return GetGray5(); }
-            if (pixel.IsGray5()) { return GetBlack(); }
+            if (pixel.IsWhite())                   { return pixel.AddShadow(White - Gray1); }
+            if (pixel.IsLighterThanOrEqual(Gray1)) { return pixel.AddShadow(Gray1 - Gray2); }
+            if (pixel.IsLighterThanOrEqual(Gray2)) { return pixel.AddShadow(Gray2 - Gray3); }
+            if (pixel.IsLighterThanOrEqual(Gray3)) { return pixel.AddShadow(Gray3 - Gray4); }
+            if (pixel.IsLighterThanOrEqual(Gray4)) { return pixel.AddShadow(Gray4 - Black); }
 
             return GetBlack();
+        }
+
+        private static bool IsLighterThanOrEqual(this byte[] pixel, byte value)
+        {
+            return pixel.GetGrayValue() >= value;
+        }
+
+        private static byte GetGrayValue(this byte[] pixel)
+        {
+            if (pixel[0] == pixel[1] && pixel[0] == pixel[2]) { return pixel[0]; }
+            int summed = pixel[0] + pixel[1] + pixel[2];
+            return (byte)(summed / 3);
+        }
+
+        private static byte[] AddShadow(this byte[] pixel, byte value)
+        {
+            return new byte[]
+                {
+                    clamp(pixel[0] - value),
+                    clamp(pixel[1] - value),
+                    clamp(pixel[2] - value),
+                    0xFF
+                };
+        }
+
+        private static byte clamp(this int value)
+        {
+            return (value < 0) ? (byte)0 : (value > 0xFF) ? (byte)0xFF : (byte)value;
         }
 
         public static bool[] CreateMaskedPixelsInfo(byte[] sourcePixels, int width, int height, IList<RegionMaskInfo> maskInfoList)
