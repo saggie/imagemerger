@@ -21,7 +21,7 @@ namespace ImageMerger
 
             foreach (var eachImageSettings in sourceImageSettingsList)
             {
-                // non-versined file
+                // non-versioned file
                 if (!eachImageSettings.fileName.ToLower().Contains("<ver>"))
                 {
                     sourceImages.Add(LoadSourceImage(eachImageSettings));
@@ -55,7 +55,8 @@ namespace ImageMerger
             ret.fileName = versionedFileName ?? sourceImageSettings.fileName;
             var filePath = Path.Combine(workingDirectoryPath, ret.fileName);
 
-            using (Bitmap sourceBitmap = new Bitmap(Image.FromFile(filePath))) // TODO handle the case when the file is missing
+            using (Image image = Image.FromFile(filePath))
+            using (Bitmap sourceBitmap = new Bitmap(image)) // TODO handle the case when the file is missing
             {
                 ret.width = sourceBitmap.Width;
                 ret.height = sourceBitmap.Height;
