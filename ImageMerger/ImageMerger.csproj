@@ -68,6 +68,7 @@
     <Compile Include="ImageSettingsManager.cs" />
     <Compile Include="PixelUtil.cs" />
     <Compile Include="SourceImageInfo.cs" />
+    <Compile Include="Utils\StringExtensions.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

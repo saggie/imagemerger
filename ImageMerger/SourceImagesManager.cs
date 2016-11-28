@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImageMerger;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -10,10 +11,13 @@ namespace ImageMerger
     {
         public IList<SourceImageInfo> sourceImages = new List<SourceImageInfo>();
 
+        private IList<string> supportedImageFormats = new List<string> { "bmp", "png", "gif", "jpg", "jpeg" };
+
         private string workingDirectoryPath;
 
         internal void refreshSourceImages(IList<SourceImageSettings> sourceImageSettingsList,
-                                          string workingDirectoryPath)
+                                          string workingDirectoryPath,
+                                          string id = null)
         {
             this.workingDirectoryPath = workingDirectoryPath;
 
@@ -21,38 +25,69 @@ namespace ImageMerger
 
             foreach (var eachImageSettings in sourceImageSettingsList)
             {
-                // non-versioned file
-                if (!eachImageSettings.fileName.ToLower().Contains("<ver>"))
+                var eachFileName = eachImageSettings.fileName;
+
+                // replace "<ID>"
+                if (eachFileName.ContainsIgnoreCase("<id>"))
                 {
-                    sourceImages.Add(LoadSourceImage(eachImageSettings));
-                    continue;
+                    eachFileName = eachFileName.ToLower().Replace("<id>", id ?? "");
                 }
 
-                var fileNameSplitByVersion = eachImageSettings.fileName.ToLower().Split(new string[] { "<ver>" }, StringSplitOptions.None);
-                var fileNameFormerPart = fileNameSplitByVersion.First();
-                var fileNameLatterPart = fileNameSplitByVersion.Last();
-
-                // create version list
-                var versionList = new List<string>();
-                foreach (var eachFilePath in Directory.GetFiles(workingDirectoryPath, fileNameFormerPart + "*"))
+                // replace "<EXT>"
+                if (eachFileName.ContainsIgnoreCase(".<ext>"))
                 {
-                    if (!eachFilePath.EndsWith(fileNameLatterPart)) { continue; }
+                    var fileNameSearchString = eachFileName.ToLower().Replace(".<ext>", ".*");
+                    fileNameSearchString = fileNameSearchString.ToLower().Replace("<ver>", "*");
 
-                    var fileName = Path.GetFileName(eachFilePath);
-                    var version = fileName.Replace(fileNameFormerPart, "").Replace(fileNameLatterPart, "");
-                    versionList.Add(version);
+                    bool isFileFound = false;
+                    foreach (var candidateFilePath in Directory.GetFiles(workingDirectoryPath, fileNameSearchString))
+                    {
+                        foreach (var eachImageFormat in supportedImageFormats)
+                        {
+                            if (candidateFilePath.EndsWith(eachImageFormat))
+                            {
+                                eachFileName = eachFileName.ToLower().Replace("<ext>", eachImageFormat);
+                                isFileFound = true;
+                                break;
+                            }
+                        }
+
+                        if (isFileFound) { break; }
+                    }
+                    if (!isFileFound) { throw new InvalidSettingsFileException(); }
                 }
 
-                var latestVersionFileName = fileNameFormerPart + versionList.Max() + fileNameLatterPart;
-                sourceImages.Add(LoadSourceImage(eachImageSettings, latestVersionFileName));
+                // replace "<VER>"
+                if (eachFileName.ContainsIgnoreCase("<ver>"))
+                {
+                    var fileNameSplitByVersion = eachFileName.ToLower().Split(new string[] { "<ver>" }, StringSplitOptions.None);
+                    var fileNameFormerPart = fileNameSplitByVersion.First();
+                    var fileNameLatterPart = fileNameSplitByVersion.Last();
+
+                    // create version list
+                    var versionList = new List<string>();
+                    foreach (var eachFilePath in Directory.GetFiles(workingDirectoryPath, fileNameFormerPart + "*"))
+                    {
+                        if (!eachFilePath.EndsWith(fileNameLatterPart)) { continue; }
+
+                        var fileName = Path.GetFileName(eachFilePath);
+                        var version = fileName.Replace(fileNameFormerPart, "").Replace(fileNameLatterPart, "");
+                        versionList.Add(version);
+                    }
+
+                    // choose latest one
+                    eachFileName = fileNameFormerPart + versionList.Max() + fileNameLatterPart;
+                }
+
+                sourceImages.Add(LoadSourceImage(eachImageSettings, eachFileName));
             }
         }
 
-        private SourceImageInfo LoadSourceImage(SourceImageSettings sourceImageSettings, string versionedFileName = null)
+        private SourceImageInfo LoadSourceImage(SourceImageSettings sourceImageSettings, string fileName)
         {
             SourceImageInfo ret = new SourceImageInfo();
 
-            ret.fileName = versionedFileName ?? sourceImageSettings.fileName;
+            ret.fileName = fileName;
             var filePath = Path.Combine(workingDirectoryPath, ret.fileName);
 
             using (Image image = Image.FromFile(filePath))

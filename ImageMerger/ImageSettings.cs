@@ -6,6 +6,7 @@ namespace ImageMerger
     [DataContract]
     public class ImageSettings
     {
+        [DataMember] public string id { get; set; }
         [DataMember] public string outputFileName { get; set; }
         [DataMember] public IList<SourceImageSettings> sourceImages { get; set; }
         [DataMember] public IList<ColorReplacementSettigns> colorReplacement { get; set; }

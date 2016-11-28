@@ -107,7 +107,7 @@ namespace ImageMerger
                     {
                         image.Dispatcher.BeginInvoke(new Action(() => UpdateMergedImage()));
                     }
-                    Thread.Sleep(1500);
+                    Thread.Sleep(500);
                 }
             });
         }

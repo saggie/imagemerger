@@ -34,7 +34,7 @@ namespace ImageMerger
             settings = imageSettingsManager.ReadSettings(settingsFilePath);
             workingDirectoryPath = Path.GetDirectoryName(settingsFilePath);
 
-            sourceImagesManager.refreshSourceImages(settings.sourceImages, workingDirectoryPath);
+            sourceImagesManager.refreshSourceImages(settings.sourceImages, workingDirectoryPath, settings.id);
 
             colorReplacementInfoList.Clear();
             if (settings.colorReplacement != null)
@@ -58,12 +58,20 @@ namespace ImageMerger
 
         internal string GetOutputFileName()
         {
-            return settings.outputFileName;
+            var outputFileName = settings.outputFileName;
+
+            // replace "<ID>"
+            if (outputFileName.ContainsIgnoreCase("<id>"))
+            {
+                outputFileName = outputFileName.ToLower().Replace("<id>", settings.id ?? "");
+            }
+
+            return outputFileName;
         }
 
         internal void SaveMergedImage()
         {
-            var fileName = settings.outputFileName;
+            var fileName = GetOutputFileName();
             var filePath = Path.Combine(workingDirectoryPath, fileName);
             if (File.Exists(filePath))
             {
