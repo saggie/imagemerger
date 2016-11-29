@@ -155,6 +155,8 @@ namespace ImageMerger
                 layerNum++;
             }
 
+            FinalizeImage(mergedPixels);
+
             mergedImage = mergedPixels.ToBitmap(width, height);
         }
 
@@ -183,6 +185,23 @@ namespace ImageMerger
             if (alphaInfo.ignoreList.ContainsSameRgb(drawingPixel)) { return false; }
 
             return true;
+        }
+
+        private void FinalizeImage(byte[] mergedPixels)
+        {
+            if (settings.autoGrayScaling)
+            {
+                for (var i = 0; i < mergedPixels.Length; i += 4)
+                {
+                    if (mergedPixels[i] == mergedPixels[i+1] &&
+                        mergedPixels[i] == mergedPixels[i+2]) { continue; }
+
+                    var brightness = (mergedPixels[i] + mergedPixels[i+1] + mergedPixels[i+2]) / 3;
+                    mergedPixels[i] = (byte)brightness;
+                    mergedPixels[i+1] = (byte)brightness;
+                    mergedPixels[i+2] = (byte)brightness;
+                }
+            }
         }
 
         internal bool IsFileUpdated()

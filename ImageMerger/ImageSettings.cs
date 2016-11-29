@@ -11,6 +11,7 @@ namespace ImageMerger
         [DataMember] public IList<SourceImageSettings> sourceImages { get; set; }
         [DataMember] public IList<ColorReplacementSettigns> colorReplacement { get; set; }
         [DataMember] public bool autoSaveAndExit { get; set; }
+        [DataMember] public bool autoGrayScaling { get; set; }
     }
 
     [DataContract]
