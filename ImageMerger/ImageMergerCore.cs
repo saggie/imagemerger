@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace ImageMerger
 {
-    public class ImagesMerger
+    public class ImageMergerCore
     {
         internal Bitmap mergedImage;
 

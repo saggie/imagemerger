@@ -11,7 +11,7 @@ namespace ImageMerger
 {
     public partial class MainWindow : Window
     {
-        private static ImagesMerger imagesMerger = new ImagesMerger();
+        private static ImageMergerCore imagesMerger = new ImageMergerCore();
 
         public MainWindow()
         {

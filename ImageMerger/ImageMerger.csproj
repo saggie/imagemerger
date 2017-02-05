@@ -63,7 +63,7 @@
     <Compile Include="IniFileManager.cs" />
     <Compile Include="Exceptions\InvalidSettingsFileException.cs" />
     <Compile Include="SourceImagesManager.cs" />
-    <Compile Include="ImagesMerger.cs" />
+    <Compile Include="ImageMergerCore.cs" />
     <Compile Include="ImageSettings.cs" />
     <Compile Include="ImageSettingsManager.cs" />
     <Compile Include="PixelUtil.cs" />
