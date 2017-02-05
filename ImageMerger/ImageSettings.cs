@@ -21,6 +21,7 @@ namespace ImageMerger
         [DataMember] public AlphaSettings alpha { get; set; }
         [DataMember] public bool isShadow { get; set; }
         [DataMember] public IList<RegionMaskInfo> regionMask { get; set; }
+        [DataMember] public string shadowColor { get; set; }
     }
 
     [DataContract]

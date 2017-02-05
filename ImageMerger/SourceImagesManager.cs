@@ -105,6 +105,9 @@ namespace ImageMerger
             ret.maskedPixelsInfo = (sourceImageSettings.regionMask != null)
                 ? PixelUtil.CreateMaskedPixelsInfo(ret.pixels, ret.width, ret.height, sourceImageSettings.regionMask)
                 : null;
+            ret.shadowColor = (sourceImageSettings.shadowColor != null)
+                ? sourceImageSettings.shadowColor.ToPixelData()
+                : null;
 
             return ret;
         }

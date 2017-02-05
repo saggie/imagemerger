@@ -108,7 +108,7 @@ namespace ImageMerger
                     {
                         var drawingPixel = sourcePixels.GetPixelAt(xi, yi, eachImage.width);
 
-                        // process region-mask
+                        // region-mask
                         bool isMaskedPixel = false;
                         if (IsMaskedPixel(eachImage.maskedPixelsInfo, xi, yi, eachImage.width))
                         {
@@ -119,14 +119,14 @@ namespace ImageMerger
                         // skip if nothing to draw
                         if (IsNothingToDraw(drawingPixel, layerNum, isMaskedPixel)) { continue; }
 
-                        // process shadowing
-                        if (eachImage.isShadowLayer && !drawingPixel.IsWhite())
+                        // shadowing
+                        if (IsShadowingTarget(eachImage, drawingPixel))
                         {
                             var sourcePixel = mergedPixels.GetPixelAt(xi, yi, width);
                             drawingPixel = PixelUtil.GetShadowedPixel(sourcePixel);
                         }
 
-                        // process color replacement
+                        // color replacement
                         foreach (var eachColorReplacementInfo in colorReplacementInfoList)
                         {
                             if (drawingPixel.IsSameRgb(eachColorReplacementInfo.from))
@@ -135,7 +135,7 @@ namespace ImageMerger
                             }
                         }
 
-                        // process alpha-blending
+                        // alpha-blending
                         if (eachImage.alphaInfo != null)
                         {
                             var alphaInfo = eachImage.alphaInfo;
@@ -185,6 +185,22 @@ namespace ImageMerger
             if (alphaInfo.ignoreList.ContainsSameRgb(drawingPixel)) { return false; }
 
             return true;
+        }
+
+        private bool IsShadowingTarget(SourceImageInfo sourceImageInfo, byte[] drawingPixel)
+        {
+            if (sourceImageInfo.isShadowLayer && !drawingPixel.IsWhite())
+            {
+                return true;
+            }
+
+            if (sourceImageInfo.shadowColor != null &&
+                sourceImageInfo.shadowColor.IsSameRgb(drawingPixel))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private void FinalizeImage(byte[] mergedPixels)

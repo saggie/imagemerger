@@ -12,6 +12,7 @@ namespace ImageMerger
         public bool[] maskedPixelsInfo;
         public AlphaInfo alphaInfo;
         public bool isShadowLayer;
+        public byte[] shadowColor;
         public ColorReplacementInfo colorReplacementInfo;
     }
 
