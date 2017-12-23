@@ -108,6 +108,14 @@ namespace ImageMerger
                     {
                         var drawingPixel = sourcePixels.GetPixelAt(xi, yi, eachImage.width);
 
+                        // position offsetting
+                        var px = xi + eachImage.positionX;
+                        var py = yi + eachImage.positionY;
+                        if (px >= width || py >= height)
+                        {
+                            continue;
+                        }
+
                         // region-mask
                         bool isMaskedPixel = false;
                         if (IsMaskedPixel(eachImage.maskedPixelsInfo, xi, yi, eachImage.width))
@@ -122,7 +130,7 @@ namespace ImageMerger
                         // shadowing
                         if (IsShadowingTarget(eachImage, drawingPixel))
                         {
-                            var sourcePixel = mergedPixels.GetPixelAt(xi, yi, width);
+                            var sourcePixel = mergedPixels.GetPixelAt(px, py, width);
                             drawingPixel = PixelUtil.GetShadowedPixel(sourcePixel);
                         }
 
@@ -141,15 +149,15 @@ namespace ImageMerger
                             var alphaInfo = eachImage.alphaInfo;
                             if (IsAlphaBlendingApplicable(drawingPixel, isMaskedPixel, alphaInfo, layerNum))
                             {
-                                var sourcePixel = mergedPixels.GetPixelAt(xi, yi, width);
+                                var sourcePixel = mergedPixels.GetPixelAt(px, py, width);
                                 drawingPixel = drawingPixel.BlendWith(sourcePixel, eachImage.alphaInfo.value);
                             }
                         }
 
-                        mergedPixels[PixelUtil.GetAddressB(xi, yi, width)] = drawingPixel[0];
-                        mergedPixels[PixelUtil.GetAddressG(xi, yi, width)] = drawingPixel[1];
-                        mergedPixels[PixelUtil.GetAddressR(xi, yi, width)] = drawingPixel[2];
-                        mergedPixels[PixelUtil.GetAddressA(xi, yi, width)] = drawingPixel[3];
+                        mergedPixels[PixelUtil.GetAddressB(px, py, width)] = drawingPixel[0];
+                        mergedPixels[PixelUtil.GetAddressG(px, py, width)] = drawingPixel[1];
+                        mergedPixels[PixelUtil.GetAddressR(px, py, width)] = drawingPixel[2];
+                        mergedPixels[PixelUtil.GetAddressA(px, py, width)] = drawingPixel[3];
                     }
                 }
                 layerNum++;

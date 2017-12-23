@@ -18,6 +18,7 @@ namespace ImageMerger
     public class SourceImageSettings
     {
         [DataMember] public string fileName { get; set; }
+        [DataMember] public IList<int> position { get; set; }
         [DataMember] public AlphaSettings alpha { get; set; }
         [DataMember] public bool isShadow { get; set; }
         [DataMember] public IList<RegionMaskInfo> regionMask { get; set; }

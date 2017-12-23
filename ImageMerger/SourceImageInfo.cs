@@ -9,6 +9,8 @@ namespace ImageMerger
         public byte[] pixels;
         public int width;
         public int height;
+        public int positionX;
+        public int positionY;
         public bool[] maskedPixelsInfo;
         public AlphaInfo alphaInfo;
         public bool isShadowLayer;

@@ -90,6 +90,12 @@ namespace ImageMerger
             ret.fileName = fileName;
             var filePath = Path.Combine(workingDirectoryPath, ret.fileName);
 
+            if (sourceImageSettings.position != null)
+            {
+                ret.positionX = sourceImageSettings.position[0];
+                ret.positionY = sourceImageSettings.position[1];
+            }
+
             using (Image image = Image.FromFile(filePath))
             using (Bitmap sourceBitmap = new Bitmap(image)) // TODO handle the case when the file is missing
             {
