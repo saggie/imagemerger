@@ -111,7 +111,7 @@ namespace ImageMerger
                         // position offsetting
                         var px = xi + eachImage.positionX;
                         var py = yi + eachImage.positionY;
-                        if (px >= width || py >= height)
+                        if (px < 0 || px >= width || py <0 || py >= height)
                         {
                             continue;
                         }
