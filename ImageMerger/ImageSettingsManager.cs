@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImageMerger.Exceptions;
+using System;
 using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace ImageMerger
+namespace ImageMerger.Exceptions
 {
     [Serializable]
     internal class InvalidSettingsFileException : Exception

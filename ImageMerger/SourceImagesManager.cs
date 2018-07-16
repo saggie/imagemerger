@@ -1,4 +1,4 @@
-﻿using ImageMerger;
+﻿using ImageMerger.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -27,13 +27,13 @@ namespace ImageMerger
             {
                 var eachFileName = eachImageSettings.fileName;
 
-                // replace "<ID>"
+                // replacing "<ID>"
                 if (eachFileName.ContainsIgnoreCase("<id>"))
                 {
                     eachFileName = eachFileName.ToLower().Replace("<id>", id ?? "");
                 }
 
-                // replace "<EXT>"
+                // replacing "<EXT>"
                 if (eachFileName.ContainsIgnoreCase(".<ext>"))
                 {
                     var fileNameSearchString = eachFileName.ToLower().Replace(".<ext>", ".*");
@@ -54,17 +54,17 @@ namespace ImageMerger
 
                         if (isFileFound) { break; }
                     }
-                    if (!isFileFound) { throw new InvalidSettingsFileException(); }
+                    if (!isFileFound) { continue; }
                 }
 
-                // replace "<VER>"
+                // replacing "<VER>"
                 if (eachFileName.ContainsIgnoreCase("<ver>"))
                 {
                     var fileNameSplitByVersion = eachFileName.ToLower().Split(new string[] { "<ver>" }, StringSplitOptions.None);
                     var fileNameFormerPart = fileNameSplitByVersion.First();
                     var fileNameLatterPart = fileNameSplitByVersion.Last();
 
-                    // create version list
+                    // creating version list
                     var versionList = new List<string>();
                     foreach (var eachFilePath in Directory.GetFiles(workingDirectoryPath, fileNameFormerPart + "*"))
                     {
@@ -75,11 +75,15 @@ namespace ImageMerger
                         versionList.Add(version);
                     }
 
-                    // choose latest one
+                    // choosing the latest one
                     eachFileName = fileNameFormerPart + versionList.Max() + fileNameLatterPart;
                 }
 
                 sourceImages.Add(LoadSourceImage(eachImageSettings, eachFileName));
+            }
+
+            if (!sourceImages.Any()) {
+                throw new ImageFileNotFoundException();
             }
         }
 
@@ -90,6 +94,12 @@ namespace ImageMerger
             ret.fileName = fileName;
             var filePath = Path.Combine(workingDirectoryPath, ret.fileName);
 
+            if (!File.Exists(filePath))
+            {
+                ret.isAvailable = false;
+                return ret;
+            }
+
             if (sourceImageSettings.position != null)
             {
                 ret.positionX = sourceImageSettings.position[0];
@@ -97,7 +107,7 @@ namespace ImageMerger
             }
 
             using (Image image = Image.FromFile(filePath))
-            using (Bitmap sourceBitmap = new Bitmap(image)) // TODO handle the case when the file is missing
+            using (Bitmap sourceBitmap = new Bitmap(image))
             {
                 ret.width = sourceBitmap.Width;
                 ret.height = sourceBitmap.Height;
@@ -115,6 +125,7 @@ namespace ImageMerger
                 ? sourceImageSettings.shadowColor.ToPixelData()
                 : null;
 
+            ret.isAvailable = true;
             return ret;
         }
 

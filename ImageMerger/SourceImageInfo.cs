@@ -6,6 +6,7 @@ namespace ImageMerger
     public class SourceImageInfo
     {
         public string fileName;
+        public bool isAvailable;
         public byte[] pixels;
         public int width;
         public int height;

@@ -99,6 +99,11 @@ namespace ImageMerger
             int layerNum = 0;
             foreach (var eachImage in sourceImages.Reverse())
             {
+                if (!eachImage.isAvailable)
+                {
+                    continue;
+                }
+
                 var sourcePixels = eachImage.pixels;
 
                 // merge images

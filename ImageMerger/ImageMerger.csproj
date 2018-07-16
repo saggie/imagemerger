@@ -60,6 +60,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Exceptions\ImageFileNotFoundException.cs" />
     <Compile Include="IniFileManager.cs" />
     <Compile Include="Exceptions\InvalidSettingsFileException.cs" />
     <Compile Include="SourceImagesManager.cs" />

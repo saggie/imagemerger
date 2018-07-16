@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImageMerger.Exceptions;
+using System;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Threading;
@@ -57,6 +58,11 @@ namespace ImageMerger
             catch (InvalidSettingsFileException)
             {
                 ShowErrorMessage("Settings file is not valid.");
+                return;
+            }
+            catch (ImageFileNotFoundException)
+            {
+                ShowErrorMessage("Image files cannot be found.");
                 return;
             }
 
