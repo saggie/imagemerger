@@ -32,6 +32,12 @@ namespace ImageMerger
                 throw new InvalidSettingsFileException();
             }
 
+            // Completing the ID (if not provided) from the settings file name
+            if (ret.id == null)
+            {
+                ret.id = Path.GetFileNameWithoutExtension(settingFilePath);
+            }
+
             return ret;
         }
 
